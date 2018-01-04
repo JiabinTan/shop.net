@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>大学生二手交易</title>
+    <link rel="stylesheet" type="text/css" href="__STATIC__/index/index/css/MainPage.css" />
+    <link rel="icon" href="__STATIC__/index/index/pic/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="p__STATIC__/index/index/ic/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="__STATIC__/index/index/pic/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="__STATIC__/index/index/pic/favicon.ico" type="image/x-icon"/>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+    <script>var logout_url = "{:url('index/index/logout')}";</script>
+    <script type="text/javascript" src="__STATIC__/index/index/js/MainPage.js"></script>
+</head>
+<body>
+    <script>
+        $(document).ready(
+            function () {
+                $.ajax(
+                {
+                    url: "{:url('index/index/getsession')}",
+
+                    success: function (data) {
+                        if ('fail' == data.status) {
+                            return;
+                        }
+                        else {
+                            var username = data.username;
+                            var id = data.id;
+                            $("div.top-bar input , div.top-bar a").remove();
+                            //var src = "'" + data.src + "'";
+                            src = "__STATIC__/index/index/pic/1.jpg";
+                            $("<img class='headshot' src='" + src + "'/>").appendTo("div.top-bar");
+                            $("<div class='info-block'><p class='name'>" + username + "</p><p class='ID'>" + id + "</p>" + "<a href='javascript::void(0)' class='logout'>登出</a>" + "</div>").appendTo("div.top-bar");
+                            $(".nav-ul li a span.person-info").text("个人主页");
+                            $(".nav-ul li a .headshot img").attr("src", "__STATIC__/index/index/pic/1.jpg");
+                        }
+                    }
+                   ,
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest.status);
+                        alert(XMLHttpRequest.readyState);
+                        alert(textStatus);
+                    },
+                });
+            });
+                //处理函数，去除登录注册，换为头像与用户名
+               
+    </script>
+    <div class="top-bar">
+        <input class="login" type="button" value="登录(Log)" onclick="UserLog()" />
+        <a href="{:url('index/register/index')}"><input class="Reg" type="button" value="注册(Reg)" onclick="" /></a>
+    </div>
+    <iframe class="login" id="iframe_log" src="{:url('index/index/login')}">
+
+    </iframe>
+    <script type="text/javascript">
+        $("div.top-bar input.login").click(function () {
+            $('iframe.login').show();
+        });
+    </script>
+    {include file="common/slide" /}
+    
+    <div class="slogan"><img src="__STATIC__/index/index/pic/slogan.png" /></div>
+    <div class="search-box">
+        
+        <div class="search-bar">
+            <div class="category">
+            </div>
+            <ul class="tog">
+                <li class="good">物品</li>
+                <li class="user">用户</li>
+            </ul>
+    <input type="text" class="search-content" placeholder="输入你需要的物品" />
+            <input class="search" type="button" value="搜  索" />
+        </div>
+        <div class="ex-requires">
+            <div class="collection-amount"><span>热度</span><img class="origin" src="__STATIC__/index/index/pic/direction.png" /></div>
+            <div class="price"><div class="dec-price"><span>价格</span><img class="origin" src="__STATIC__/index/index/pic/direction.png" /></div><input type="number" placeholder="￥" min="0"/><span>—</span><input placeholder="￥" type="number" max="9999999999"/><input type="button" value="确定"/></div>
+        </div>
+    </div>
+    <div class="blank_"></div>
+
+
+    <!--商品详情页-->
+    <div class="content" id="content"></div>
+    <div class="commodity-detail">
+        <div class="commodity">
+            <h1 class="title"></h1>
+            <p class="name"></p>
+            <div class='before'><p><</p></div>
+            <div class='after'><p>></p></div>
+            <div class="pictures">
+                <div class="picture-container">
+                </div>
+                <div class="thumbnail"></div>
+            </div>
+            <p class="likes"><span>likes:</span><span class="amount"></span></p>
+            <p class="expire"><span>过期时间:</span><span class="expire-time"></span></p>
+            <input type="button" value="买" />
+        </div>
+        <div class="close-table"><p>×</p></div>
+    </div>
+
+
+
+    <script type="text/javascript">
+			var detailUrl="{:url('index/goods/detail')}";
+    	var Icount=0;
+    	var isAll=false;
+
+    	 $.ajax({
+                    url: "{:url('index/goods/index')}",
+										data:{'items':Icount},
+                    success: function (data) {
+                        if ('ok' != data.status) {
+                            return;
+                        }
+                        else {
+				                    var goods;
+				    								isAll=data.isAll;
+                        		goods=data.goods;
+                        		Icount+=data.count;
+														$(goods).each(function(index,item)
+														{
+														
+															item=JSON.parse(item);
+													
+															var strall = "<span class='content-span'>Des:" + item.description + "</span><p class='price'>Price: ￥" + item.price + "</p><p>Likes:  " + item.likes + "</p><img class='collection' src='__STATIC__/index/index/pic/collection.png'/>";
+															var str = item.path + "/00.jpg";
+															var div = document.createElement("div");
+															div.innerHTML = strall;
+															var img = document.createElement("img");
+															img.setAttribute("src", "__STATIC__/goods/"+str);
+															img.setAttribute("id",item.id);
+															img.setAttribute("class", "content-img");
+															div.setAttribute("class", "content-div");
+															div.appendChild(img);
+															var outer = document.getElementById("content");
+															outer.appendChild(div);
+       											 }
+														);
+														
+                        }
+                    }
+                   ,
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest.status);
+                        alert(XMLHttpRequest.readyState);
+                        alert(textStatus);
+                    },
+
+      });
+    </script>
+    <script type="text/javascript">
+        function loading()
+        {
+            var WinHeight = document.documentElement.clientHeight;
+            var DocHeight = document.documentElement.scrollHeight;
+            var OffSet = document.documentElement.scrollTop;
+            if (Math.abs(DocHeight - (OffSet + WinHeight)) < 1) {
+                _isLoading = true;
+                $(window).unbind("scroll",loading);
+                var outer = $("#content");
+                $("<img src='__STATIC__/index/index/pic/loading.gif' class='loading' />").css({
+                    'border-radius': '50%',
+                    'height': '38px',
+                    'width': '38px',
+                    'position': 'absolute',
+                    'bottom': '-27px',
+                    'left': "497px"
+                }).appendTo(outer);
+               // $("div.foot").css("top", "32px");
+               //console.log('4...');
+               $("div.foot").offset({ top: $("div.content").height() + $("div.content").offset().top+32, left: $("div.foot").offset().left });
+                $.post("here is target file", String(ComNum), function (data) {
+                    if ("OK") {
+                        //添加元素
+                        ComNum += data.Num;
+                        _isLoading = false;
+                        $("div.foot").css("top", "0px");
+                        $("#content img.loading").remove();
+                        $(window).bind("scroll", loading);
+                    }
+                });
+            }
+            
+        }
+        $(window).scroll(loading);
+    </script>
+    {include file="common/foot" /}
+</body>
+</html>

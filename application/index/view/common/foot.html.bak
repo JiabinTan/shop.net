@@ -1,0 +1,10 @@
+﻿<div class="foot">
+    <p>KOMO Studio 版权所有</p>
+</div>
+<script type="text/javascript">
+        var time = new Date();
+        var yr = time.getFullYear();
+        var str = '<p>COPYRIGHT © 2017 – ' + yr + ' TENCENT. ALL RIGHTS RESERVED.</p>';
+        $("div.foot p").before(str);
+</script>
+<a class="qq" href="tencent://message/?uin=1340920662&Site=&menu=yes"><img class="QQ" src="__STATIC__/index/index/pic/QQservice.jpg" /></a>

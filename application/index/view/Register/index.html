@@ -1,0 +1,93 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>用户注册</title>
+    <link rel="icon" href="__STATIC__/common/Pic/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="__STATIC__/common/Pic/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="__STATIC__/register/index/css/Register.css" />
+    
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+    <script>var jump_page_url = "{:url('index/index/jump')}";</script>
+    <script type="text/javascript" src="__STATIC__/register/index/js/Register.js"></script>
+    <script type="text/javascript" src="__STATIC__/register/index/js/school.js"></script>
+    <script type="text/javascript" src="__STATIC__/register/index/js/JudgeAc.js"></script>
+    <style id="__web-inspector-hide-shortcut-style__" type="text/css">
+        .__web-inspector-hide-shortcut__, .__web-inspector-hide-shortcut__ *, .__web-inspector-hidebefore-shortcut__::before, .__web-inspector-hideafter-shortcut__::after {
+            visibility: hidden !important;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="log-info">
+        <h1>注&nbsp;&nbsp;&nbsp;&nbsp;册</h1>
+        <form>
+            <!--action=“” 该处为发送表单至某处 method="post" -->
+            <label id="reusername" for="usernamecontain"><b class="important">*</b>用户名:</label>
+            <div id="usernamecontain" >
+                <img src="__STATIC__/common/Pic/warning.png" id="usernamewrong" />
+                <img src="__STATIC__/common/Pic/pass.png" id="usernamepass"  />
+                <input id="username" name="username" tabindex="1" placeholder="请输入用户名" class="user-name TextRed" type="text" value="" flag="0" />
+                <img class="username-load" src="__STATIC__/common/Pic/load.gif"/>
+                <span class="username-tip"></span>
+            </div>
+            <label for="passwordcontain" id="repassword"><b class="important">*</b>请输入您的密码:(必须以字母开头)</label>
+            <div id="passwordcontain">
+                <img src="__STATIC__/common/Pic/warning.png" id="passwordwrong"  />
+                <img src="__STATIC__/common/Pic/pass.png" id="passwordpass"  />
+                <input id="password" name="password" tabindex="2" placeholder="输入密码" class="pass-word" type="password" value="" autocomplete="off" flag="1" />
+                <span class="password-tip"></span>
+            </div>
+            <label for="password-againcontain" id="repasswordagain"><b class="important">*</b>请再输入您的密码:</label>
+            <div id="password-againcontain">
+                <img src="__STATIC__/common/Pic/warning.png" id="password-againwrong"  />
+                <img src="__STATIC__/common/Pic/pass.png" id="password-againpass"  />
+                <input id="password-again" name="password-again" tabindex="3" placeholder="两次输入的密码不一致" class="pass-word-again TextRed" type="password" value="" autocomplete="off" flag="0" />
+                <span class="passwordagain-tip"></span>
+            </div>
+            <label for="emailcontain" id="reemail"><b class="important">*</b>请输入您的邮箱:</label>
+            <div id="emailcontain">
+                <img src="__STATIC__/common/Pic/warning.png" id="emailwrong"  />
+                <img src="__STATIC__/common/Pic/pass.png" id="emailpass"  />
+                <input id="email" name="email" tabindex="4" placeholder="请输入正确的邮箱" class="email TextRed" type="text" value="" autocomplete="on" flag="0" />
+                <div id="emaillist" class="emaillist"></div>
+                <span class="email-tip"></span>
+            </div>
+            <center id="schoolcontain">
+                <img src="__STATIC__/common/Pic/warning.png" id="schoolwrong"  />
+                <img src="__STATIC__/common/Pic/pass.png" id="schoolpass"  />
+                <label for="schoolName"><b class="important">*</b>学校名称：</label><input name="school" type="text" id="school" tabindex="4" placeholder="" readonly="" flag="1"  />
+                <div id="proSchool" class="provinceSchool" >
+                    <div class="title"><span>请选择学校</span></div>
+                    <div class="proSelect">
+                        <select></select>
+                        <span>如没找到选择项，请选择其他手动填写</span>
+                        <input type="text" />
+                    </div>
+                    <div class="schoolList">
+                        <ul></ul>
+                    </div>
+                    <div class="button">
+                        <input type="button" flag="0" value="取消" />
+                        <input type="button" flag="1" value="确定" />
+                    </div>
+                </div>
+                <span class="school-tip"></span>
+            </center>
+            <label for="contactcontain" id="recontact">请输入您的联系方式:</label>
+            <div id="contactcontain">
+                <input id="contact" name="contact" tabindex="5" placeholder="联系方式(QQ/TEL)" class="contact" type="text" value="" flag="1"  />
+                <span class="contact-tip">（可不填）请勿填写错误信息！</span>
+            </div>
+            <div id="submitcontain">
+                <input id="submit" tabindex="6" type="button" value=""  />
+                <span onclick="$('#submit').trigger('click')">提&#13;&#10;交</span>
+                <img src="__STATIC__/common/Pic/55F58PICtCT_1024.png" onclick="$('#submit').trigger('click')" />
+            </div>
+
+        </form>
+    </div>
+
+</body>
+</html>
