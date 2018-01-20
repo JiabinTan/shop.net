@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>大学生二手交易</title>
+    <link type="text/css" href="__STATIC__/publish/index/css/publish.css" rel="stylesheet"/>    
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+    <script type="text/javascript" src="__STATIC__/publish/index/js/Publish.js"></script>
+    <link rel="icon" href="__STATIC__/index/index/pic/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="__STATIC__/index/index/pic/favicon.ico" type="image/x-icon" />
+</head>
+<body>
+    <div id="log-info">
+        <form>
+            <!--action=“” 该处为发送表单至某处 method="post" -->
+            <div id="usernamecontain">
+                <input id="username" name="username" tabindex="1" placeholder="输入用户名/邮箱/手机号" class="user-name" type="text" value="">
+            </div>
+            <div id="passwordcontain">
+                <input id="password" name="password" tabindex="2" placeholder="输入密码" class="pass-word" type="password" value="" autocomplete="off">
+            </div>
+            <span id="check">
+                <input type="checkbox" id="remmember" name="RemPSW" tabindex="3" />
+                <label for="RemPSW" id="remLB">记住密码</label>
+            </span>
+            <span id="linkPSW">
+                <a id="forgetPSW" href="http://baidu.com">忘记密码</a>
+            </span>
+            <div id="submitcontain">
+                <input id="submit" tabindex="4" type="button" value="提    交" />
+            </div>
+            <hr id="cut-line" />
+            <a href="http://baidu.com"><img id="login-QQ" src="__STATIC__/publish/index/pic/favicon.ico" /></a>
+        </form>
+    </div>
+    <script>
+    $("#log-info").hide();
+    $("#submit").click(function () {
+        $("#log-info").hide();
+    });
+    </script>
+
+    <div class="top-bar">
+        <input class="login" type="button" value="登录(Log)" onclick="UserLog()" />
+        <a href="{:url('index/register/index')}"><input class="Reg" type="button" value="注册(Reg)" onclick="UserReg()" /></a>
+    </div>
+    <div class="slogan"><img src="__STATIC__/publish/index/pic/slogan.png" /></div>
+   	{include file="common/slide" /}
+   	
+    
+    
+    <script type="text/javascript">
+        $(".nav-main .slidetoggle").css(
+       {
+           "top": String(window.innerHeight / 2 - 50) + "px",
+        });
+    </script>
+    <div class="outer">
+        <form>
+            <h1>商品上传</h1>
+            <ul>    
+                <li><span>物品:</span><input name="name" type="text" /></li>
+                <li><span>归类:</span><input type="text" name="cate" placeholder="例如：雨伞、微积分等"/></li>
+                <li><span>价格(￥):</span><input type="number"  name="price"/></li>
+                <li><span class="bigWord">详细介绍:</span><textarea name="desc" placeholder="请尽可能详细的对物品进行描述，比如新旧、大小等方面，以便于他人做出合理的判断。" maxlength="500" class="bigText" type="text"></textarea></li>
+                <li><span class="span_mov">上传图片:</span><input type="file" name="pic" multiple="multiple" accept="image/jpg,image/jpeg,image/png"></li>
+            </ul>
+            <input type="submit" class="commodity_up" value="提   交" />
+        </form>
+</div>
+    
+    {include file="common/foot" /}
+</body>
+</html>

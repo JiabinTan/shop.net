@@ -2,9 +2,10 @@
     <div class="nav-box">
         <div class="nav">
             <ul class="nav-ul">
-                <li><a href="../MainPage/MainPage.html" class="home"><div class="logo"><img src="__STATIC__/index/index/pic/logo.png" /></div><span>首页</span></a></li>
+                <li><a href="{:url('/')}" class="home"><div class="logo"><img src="__STATIC__/index/index/pic/logo.png" /></div><span>首页</span></a></li>
                 <li><a href="javascript:void(0)<!--../myinfo/PersonalInfo.html-->" class="myinfo"><div class="headshot"><img src="__STATIC__/index/index/pic/1.jpg" /></div><span class="person-info">未登录</span></a></li>
-                <li><a href="../commodity-publish/uploadCommodity.html" class="commodity"><div class="goods"><img src="__STATIC__/index/index/pic/goods.jpg" /></div><span class="publish-com">发布商品</span></a></li>
+                <li><a href="javascript:void(0)" class="commodity"><div class="goods"><img src="__STATIC__/index/index/pic/goods.jpg" /></div><span class="publish-com">发布商品</span></a></li>
+                
                 <li><a href="javascript:void(0)" class="aboutus" onclick="us_click()"><div class="aboutus"><img src="__STATIC__/index/index/pic/b17eca8065380cd7e93f70cfab44ad34598281eb.jpg" /></div><span>关于我们</span></a></li>
                 <li><a href="javascript:void(0)" class="lab" onclick="lab_click()"><div class="lab"><img src="__STATIC__/index/index/pic/87Y58PICJFQ.jpg" /></div><span>实验室</span></a></li>
             </ul>
@@ -14,6 +15,31 @@
         </div>
     </div>
 </div>
+<script>
+    $('div.nav-main ul.nav-ul li a.commodity').click(function () {
+        $.ajax(
+        {
+            url: "{:url('index/publish/check')}",
+
+            success: function (data) {
+                if ('fail' == data.status) {
+                    alert("请先登录！");
+                }
+                else if ('ok' == data.status)
+                {
+                    window.location.href = "{:url('index/publish/index')}";
+                }
+            }
+       ,
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest.status);
+                alert(XMLHttpRequest.readyState);
+                alert(textStatus);
+            },
+        })
+    });
+</script>
+
 <script type="text/javascript">
         //$("body").animate({ scrolltop: 1000 }, 1000)
     $(".nav-main .slidetoggle").css(

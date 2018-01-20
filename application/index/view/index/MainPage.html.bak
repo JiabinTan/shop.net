@@ -140,6 +140,7 @@
 															outer.appendChild(div);
        											 }
 														);
+														replaceFooter();
 														
                         }
                     }
