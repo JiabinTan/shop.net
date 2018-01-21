@@ -29,7 +29,11 @@ class Index extends Controller
 		$session_id=Session::get('id','personinfo');
 		$session_username=Session::get('username','personinfo');
 		if($session_id&&$session_username)
+		{
+			Session::set('id',$session_id,'personinfo');
+			Session::set('username',$session_username,'personinfo');
 			return json(['status'=>'ok','username'=>$session_username,'id'=>$session_id]);
+		}
 		else if($autolog_username&&$autolog_token)
 			{
 				$ind=new IndModel();

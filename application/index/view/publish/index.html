@@ -6,6 +6,7 @@
     <link type="text/css" href="__STATIC__/publish/index/css/publish.css" rel="stylesheet"/>    
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
     <script type="text/javascript" src="__STATIC__/publish/index/js/publish.js"></script>
+    <script type="text/javascript" src="__STATIC__/common/js/formToJson.js"></script>
     <link rel="icon" href="__STATIC__/index/index/pic/favicon.ico" type="image/x-icon" />
     <link rel="shortcut icon" href="__STATIC__/index/index/pic/favicon.ico" type="image/x-icon" />
 </head>
@@ -22,7 +23,7 @@
 
                     success: function (data) {
                         if ('fail' == data.status) {
-                            return;
+                            //window.location.href = "{:url('/')}";
                         }
                         else {
                             var username = data.username;
@@ -61,7 +62,7 @@
         });
     </script>
     <div class="outer">
-        <form action="{:url('index/publish/receive')}" enctype="multipart/form-data" method="post">
+        <form action="{:url('index/publish/receive')}" id="uploads" enctype="multipart/form-data" method="post">
             <h1>商品上传</h1>
             <ul style="background: #fbfbfb;width: 650px;left: 144px;margin-bottom: -14px;position: relative;border-radius: 0;border: 1px solid #dddddd;">
                 <li><span>物品:</span><input name="name" type="text" /></li>
@@ -220,44 +221,128 @@
             // 上传多个文件
             funUploadFiles: function () {
                 var self = this;  // 在each中this指向没个v  所以先将this保留
+                var files = self.uploadFile;
                 // 遍历所有文件  ，在调用单个文件上传的方法
-                $.each(this.uploadFile, function (k, v) {
-                    self.funUploadFile(v);
+                //console.log(this.index);
+                //$.each(this.uploadFile, function (k, v) {
+                //    console.log(v.index);
+                //    self.funUploadFile(v);
+                //});
+                
+                var formdata = new FormData();
+                $(files).each(function (k, file) {
+                    console.log(k);
+                    formdata.append("fileList[]", file);
                 });
+                var data = decodeURIComponent($("#uploads").serialize(), true);//防止中文乱码
+                var json = DataDeal.formToJson(data);//转化为json
+                formdata.append("goodInfo", json);
+
+
+                    var xhr = new XMLHttpRequest();
+                    // 绑定上传事件
+                    // 进度
+                    xhr.upload.addEventListener("progress", function (e) {
+                        // 回调到外部
+                        $(files).each(function (k, file) {
+                            self.onProgress(file, e.loaded, e.total);
+                        });
+                    }, false);
+                    // 完成
+                    xhr.addEventListener("load", function (e) {
+                        if (xhr.status == 200) {
+                            var response = JSON.parse(xhr.responseText);
+                            if (response.status == 'ok') {
+                                $(files).each(function (k, file) {
+                                    // 从文件中删除上传成功的文件  false是不执行onDelete回调方法
+                                    self.funDeleteFile(file.index, true);
+                                    // 回调到外部
+                                    self.onSuccess(file, xhr.responseText);
+                                    if (self.uploadFile.length == 0) {
+                                        // 回调全部完成方法
+                                        self.onComplete("全部完成");
+                                    }
+                                });
+                                window.location.href = response.url;
+                            }
+                            else {
+                                console.log(response);
+
+                                alert(response.messege);
+                            }
+                        
+                        }
+                        else {
+                            alert("提交信息时发生错误，错误代码：" + xhr.status);
+                        }
+                    }, false);
+                    // 错误
+                    xhr.addEventListener("error", function (e) {
+                        
+                        $(this).each(function (k, file) {
+                            // 回调到外部
+                            self.onFailure(file, xhr.responseText);
+                            
+                        });
+                        alert("上传出错，请刷新重试!");
+                    
+                    }, false);
+                    xhr.open("POST", "{:url('index/publish/receive')}", true);
+                    //xhr.setRequestHeader("X_FILENAME", file.name);
+                    xhr.send(formdata);
+
             },
             // 上传单个个文件
-            funUploadFile: function (file) {
-                var self = this;  // 在each中this指向没个v  所以先将this保留
+            //funUploadFile: function (file) {
+            //    var self = this;  // 在each中this指向没个v  所以先将this保留
 
-                var formdata = new FormData();
-                formdata.append("fileList", file);
-                var xhr = new XMLHttpRequest();
-                // 绑定上传事件
-                // 进度
-                xhr.upload.addEventListener("progress", function (e) {
-                    // 回调到外部
-                    self.onProgress(file, e.loaded, e.total);
-                }, false);
-                // 完成
-                xhr.addEventListener("load", function (e) {
-                    // 从文件中删除上传成功的文件  false是不执行onDelete回调方法
-                    self.funDeleteFile(file.index, false);
-                    // 回调到外部
-                    self.onSuccess(file, xhr.responseText);
-                    if (self.uploadFile.length == 0) {
-                        // 回调全部完成方法
-                        self.onComplete("全部完成");
-                    }
-                }, false);
-                // 错误
-                xhr.addEventListener("error", function (e) {
-                    // 回调到外部
-                    self.onFailure(file, xhr.responseText);
-                }, false);
-                xhr.open("POST", "{:url('index/publish/receive')}", true);
-                xhr.setRequestHeader("X_FILENAME", file.name);
-                xhr.send(formdata);
-            },
+            //    var formdata = new FormData();
+            //    formdata.append("fileList", file);
+            //    var data = decodeURIComponent($("#uploads").serialize(), true);//防止中文乱码
+            //    var json = DataDeal.formToJson(data);//转化为json
+            //    formdata.append("goodInfo",json);
+            //    var xhr = new XMLHttpRequest();
+            //    // 绑定上传事件
+            //    // 进度
+            //    xhr.upload.addEventListener("progress", function (e) {
+            //        // 回调到外部
+            //        self.onProgress(file, e.loaded, e.total);
+            //    }, false);
+            //    // 完成
+            //    xhr.addEventListener("load", function (e) {
+            //        if (xhr.status == 200) {
+
+            //            // 从文件中删除上传成功的文件  false是不执行onDelete回调方法
+            //            self.funDeleteFile(file.index, true);
+            //            // 回调到外部
+            //            self.onSuccess(file, xhr.responseText);
+            //            if (self.uploadFile.length == 0) {
+            //                // 回调全部完成方法
+            //                self.onComplete("全部完成");
+            //            }
+            //            var response = JSON.parse(xhr.responseText);
+            //            if (response.status == 'ok')
+            //                window.location.href = response.url;
+            //            else {
+                            
+            //                alert(response.messege);
+            //            }
+            //        }
+            //        else {
+            //            alert("提交信息时发生错误，错误代码："+xhr.status);
+            //        }
+            //    }, false);
+            //    // 错误
+            //    xhr.addEventListener("error", function (e) {
+            //        // 回调到外部
+            //        self.onFailure(file, xhr.responseText);
+            //        alert("上传出错，请刷新重试!");
+            //    }, false);
+            //    xhr.open("POST", "{:url('index/publish/receive')}", true);
+            //    xhr.setRequestHeader("X_FILENAME", file.name);
+            //    xhr.send(formdata);
+                
+            //},
             // 返回需要上传的文件
             funReturnNeedFiles: function () {
                 return this.uploadFile;
@@ -644,8 +729,7 @@
                             onSuccess: function (file, response) {
                                 $("#uploadProgress_" + file.index).hide();
                                 $("#uploadSuccess_" + file.index).show();
-                                $("#uploadInf").append("<p>上传成功，文件地址是：" + response + "</p>");
-                                // 根据配置参数确定隐不隐藏上传成功的文件
+                               
                                 if (para.finishDel) {
                                     // 移除效果
                                     $("#uploadList_" + file.index).fadeOut();
@@ -656,7 +740,6 @@
                             onFailure: function (file) {
                                 $("#uploadProgress_" + file.index).hide();
                                 $("#uploadSuccess_" + file.index).show();
-                                $("#uploadInf").append("<p>文件" + file.name + "上传失败！</p>");
                                 //$("#uploadImage_" + file.index).css("opacity", 0.2);
                             },
 
@@ -726,7 +809,7 @@
                 height: "400px",                 // 宽度
                 itemWidth: "120px",                 // 文件项的宽度
                 itemHeight: "100px",                 // 文件项的高度
-                url: "/upload/UploadAction",  // 上传文件的路径
+                url: "{:url('index/publish/receive')}",  // 上传文件的路径
                 multiple: true,                    // 是否可以多个文件上传
                 dragDrop: true,                    // 是否可以拖动上传文件
                 del: true,                    // 是否可以删除文件
