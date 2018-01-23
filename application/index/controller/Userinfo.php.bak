@@ -1,0 +1,29 @@
+<?php
+namespace app\index\controller;
+use \think\Controller;
+use \think\Session;
+use \think\Cookie;
+use \app\index\model\User as UserModel;
+use \app\index\model\Goods as GoodsModel;
+class Userinfo extends Controller
+{
+    public function index()
+    {
+        return $this->fetch("userinfo");
+    }
+	public function getInfo(){
+		$user=new UserModel();
+		$goods=new GoodsModel();
+		$session_id=Session::get('id','personinfo');
+		$session_username=Session::get('username','personinfo');
+		if(!($session_id&&$session_username))
+			return json(["status"=>"fail","messege"=>"您的登录存在问题"]);
+		$userinfo=$user->find($session_id)->field("username,email,contact,school,headshot,ip");
+		$goodinfo=$goods->where("owner_id",$session_id)->select()[0];
+		dump($userinfo);
+		dump($goodinfo);
+		$data=["userinfo"=>$userinfo->toJson(),"goodsinfo"=>$goodinfo->toJson()];
+		return json(['status'=>"ok","data"=>$data]);
+	}
+
+}

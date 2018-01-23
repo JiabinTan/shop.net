@@ -5,5 +5,5 @@ use \think\Model;
 class Login extends Model
 {
 	protected $table = 'user';
-	
+	protected $autoWriteTimestamp="timestamp";
 }

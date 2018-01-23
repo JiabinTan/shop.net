@@ -4,6 +4,7 @@ use \think\Controller;
 use \think\Session;
 use \think\Cookie;
 use \app\index\model\Goods as GoodsModel;
+use \app\index\model\User as UserModel;
 use \app\index\validate\Publish as InfoValidate;
 class Publish extends Controller
 {
@@ -22,12 +23,25 @@ class Publish extends Controller
 	}
 	public function receive()
 	{
+		$id=Session::get('id','personinfo');
+		$username=Session::get('username','personinfo');
+		if(!$id||!$username)
+		{
+			return json(['status'=>'fail','messege'=>"登录存在问题，请重试",'url'=>"\\"]);
+		}
+		$good=new GoodsModel();
+		$count=$good->where("owner_id",$id)->count();
+		if(count($count)>=5)
+			return json(['status'=>'fail','messege'=>"发布数量已达上限，无法再发布",'url'=>"\\"]);
 		$request=request();
 		$images = $request->file()['fileList'];
 		$count=count($images);
+		if($count>4)
+			$count=4;
 		$path="";
 		for($i=0;$i<$count;$i++)
 		{
+			//部署时候需要改变位置
 			$imgInfo=$images[$i]->move("D:\dev\shop.net\public\uploads");
 			if(false==$imgInfo)
 				return json(['status'=>'fail','messege'=>"商品图片存储存在问题，请重试",'url'=>"\\"]);
@@ -71,9 +85,7 @@ class Publish extends Controller
 			return json(['status'=>$status,'messege'=>$messege,'url'=>"\\"]);
 			}
 		}
-		$id=Session::get('id','personinfo');
-		$username=Session::get('username','personinfo');
-		$good=new GoodsModel();
+		
 		$good->name=$info->name;
 		if(!empty($tags[0]))
 			$good->tag1=$tags[0];

@@ -38,6 +38,15 @@
             },
         })
     });
+    $('div.nav-main ul.nav-ul li a.myinfo').click(function () {
+
+        if ("个人主页" != $(".nav-ul li a span.person-info").text())
+            $("div.top-bar input.login").trigger("click");
+        else {
+            window.location.href = "{:url('index/userinfo/index')}";
+        }
+        
+    });
 </script>
 
 <script type="text/javascript">

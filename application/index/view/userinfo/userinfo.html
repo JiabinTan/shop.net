@@ -1,0 +1,298 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>大学生二手交易</title>
+    <link rel="stylesheet" type="text/css" href="__STATIC__/userinfo/css/PersonalInfo.css" />
+    <link rel="icon" href="__STATIC__/userinfo/pic/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="__STATIC__/userinfo/pic/favicon.ico" type="image/x-icon"/>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+    <script type="text/javascript" src="__STATIC__/userinfo/js/PersonalInfo.js"></script>
+    <script type="text/javascript" src="__STATIC__/userinfo/js/Judge.js"></script>
+    <script type="text/javascript" src="__STATIC__/userinfo/js/school.js"></script>
+</head>
+<body>
+    <script>
+        var STATIC = "__STATIC__";
+        $(document).ready(
+            function () {
+                $.ajax(
+                {
+                    url: "{:url('index/userinfo/getinfo')}",
+
+                    success: function (data) {
+                        if ('fail' == data.status) {
+                            alert(data.messege);
+                        }
+                        else if ('ok' == data.status) {
+                            //<!--安全信息AJAX-->
+                            var userinfo = JSON.parse(data.data.userinfo);
+                            var goodsinfo = JSON.parse(data.data.goodsinfo);
+                            var likesinfo = JSON.parse(data.data.likesinfo);
+                            var purchaseinfo = JSON.parse(data.data.purchaseinfo);
+                            console.log(userinfo);
+                            console.log(goodsinfo);
+                            console.log(likesinfo);
+                            console.log(purchaseinfo);
+                            var ips = userinfo.ip;
+                            //ip需要处理ip与时间在一起
+                            var infos = ips.split(";");
+                            for (var i=1; i < infos.length; i++)
+                            {
+                                var info=infos[i].split("'");
+                                var ip = info[0];
+                                var time = info[1];
+                                var addr = info[2];
+                                str += "<li><span class='time'>" + time + "</span><span class='ip'>" + ip + "</span><span class='addr'>" + addr + "</span></li>";
+                            }
+                            $("div.security div.loginIP ul").append(str);
+
+                            //我的信息
+                            var contact = userinfo.contact;
+                            var username = userinfo.username;
+                            var email = userinfo.email;
+                            var headshot = userinfo.heashot;
+                            var school = userinfo.school;
+                            
+
+                            //<!--在售商品AJAX-->
+                            var name;
+                            var expire;
+                            var price;
+                            var owner;
+                            for (var i = 0; i < goodsinfo.length; i++)
+                            {
+                                name = goodsinfo[i].name;
+                                expire = goodsinfo[i].expire;
+                                price = goodsinfo[i].price;
+                                var tr = document.createElement("tr");
+                                var str = '<td>' + name + '</td>' + "<td>" + expire + "</td>" + "<td>" + price + "</td>" + "<td><a src='javascript:void(0)'>详细信息</a></td><td><a src='javascript:void(0)'>Del</a></td>";
+                                $(tr).html(str);
+                                $(".sale-info .MyGoods").append(tr);
+                            }
+                            console.log();
+                            // <!--已买物品AJAX-->
+                            for (var i = 0; i < purchaseinfo.length; i++) {
+                                name = purchaseinfo[i].name;
+                                owner = purchaseinfo[i].owner;
+                                price = purchaseinfo[i].price;
+                                var tr = document.createElement("tr");
+                                var str = '<td>' + name + '</td>' + "<td>" + owner + "</td>" + "<td>" + price + "</td>" + "<td><a src='javascript:void(0)'>详细信息</a></td><td><a src='javascript:void(0)'>Del</a></td>";
+                                $(tr).html(str);
+                                $(".purchase-info .MyPurchase   ").append(tr);
+                            }
+                            //收藏的物品
+                            
+                            for (var i = 0; i < likesinfo.length; i++) {
+                                name = likesinfo[i].name;
+                                owner = likesinfo[i].owner;
+                                price = likesinfo[i].price;
+                                var tr = document.createElement("tr");
+                                var str = '<td>' + name + '</td>' + "<td>" + owner + "</td>" + "<td>" + price + "</td>" + "<td><a src='javascript:void(0)'>详细信息</a></td><td><a src='javascript:void(0)'>Del</a></td>";
+                                $(tr).html(str);
+                                $(".likes-info .MyLikes").append(tr);
+                            }
+                            
+                        }
+                    }
+                    ,
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest.status);
+                        alert(XMLHttpRequest.readyState);
+                        alert(textStatus);
+                    },
+                });
+                $.ajax(
+                {
+                    url: "{:url('index/index/getsession')}",
+
+                    success: function (data) {
+                        if ('fail' == data.status) {
+                            //window.location.href = "{:url('/')}";
+                        }
+                        else {
+                            var username = data.username;
+                            var id = data.id;
+                            $("div.top-bar input , div.top-bar a").remove();
+                            //var src = "'" + data.src + "'";
+                            $(".nav-ul li a span.person-info").text("个人主页");
+                            $(".nav-ul li a .headshot img").attr("src", "__STATIC__/index/index/pic/1.jpg");
+                        }
+                    }
+                   ,
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest.status);
+                        alert(XMLHttpRequest.readyState);
+                        alert(textStatus);
+                    },
+                });
+        });
+
+
+    </script>
+
+    <div class="commodity-detail" >
+        <div class="commodity">
+            <h1 class="title"></h1>
+            <p class="name"></p>
+            <div class='before'><p><</p></div>
+            <div class='after'><p>></p></div>
+            <div class="pictures">
+                <div class="picture-container">
+                </div>
+                <div class="thumbnail"></div>
+            </div>
+            <p class="likes"><span>likes:</span><span class="amount"></span></p>
+            <p class="expire"><span>过期时间:</span><span class="expire-time"></span></p>
+            <input type="button" value="买" />
+        </div>
+        <div class="close-table"><p>×</p></div>
+    </div>
+    <div class="bkground-image"><img src="__STATIC__/userinfo/pic/bkground.jpg"></div>
+    <div class="sale-detail">
+        <div class="close-table"><p>×</p></div>
+        <table class="MyGoods">
+            <tr>
+                <th>物品</th>
+                <th>到期时间</th>
+                <th>状态</th>
+                <th>购买者</th>
+                <th>联系方式</th>
+                <th>所在学校</th>
+                <th>对方邮箱</th>
+            </tr>
+        </table>
+    </div>
+    <div class="purchase-detail">
+        <div class="close-table"><p>×</p></div>
+        <table class="MyGoods">
+            <tr>
+                <th>物品</th>
+                <th>到期时间</th>
+                <th>卖家</th>
+                <th>联系方式</th>
+                <th>所在学校</th>
+                <th>对方邮箱</th>
+                <th><a href="javascript:void(0)">商品页面</a></th>
+            </tr>
+        </table>
+    </div>
+
+    <div class="slogan"><img src="__STATIC__/userinfo/pic/slogan.png" /></div>
+    {include file="common/slide" /}
+    
+
+    <script type="text/javascript">
+    $(".nav-main .slidetoggle").css(
+   {
+       "top": String(window.innerHeight / 2 - 50) + "px",
+   });
+    </script>
+
+    <div class="info-black">
+        <div class="basic-info">
+            <h1>基本信息</h1>
+            <div class="part1">
+                <h3>头像</h3>
+                <img class="headshot"src="__STATIC__/userinfo/pic/2014001313895746404551930294844.jpg" />
+                <input type="file" accept="image/jpeg,image/jpg,image/png" />
+                <br/>
+                <a href="javascript:void(0)">修改</a>
+            </div>
+            <div class="part2">
+                <h3>用户名</h3>
+                <p class="username">KOMO</p>
+                <a href="javascript:void(0)">修改</a>
+            </div>
+            <div class="part3">
+                <h3>学校</h3>
+                <p class="school">uestc</p>
+                <div id="proSchool" class="provinceSchool">
+                    <div class="title"><span>请选择学校</span></div>
+                    <div class="proSelect">
+                        <select></select>
+                        <span>如没找到选择项，请选择其他手动填写</span>
+                        <input type="text" class="input_shchool"/>
+                    </div>
+                    <div class="schoolList">
+                        <ul></ul>
+                    </div>
+                    <div class="button">
+                        <input type="button" flag='0' value="取消" />
+                        <input type="button" flag='1' value="确定" />
+                    </div>
+                </div>
+                <a href="javascript:void(0)">修改</a>
+            </div>
+            <div class="part4">
+                <h3>联系方式</h3>
+                <p class="contact">1035844563</p>
+                <a href="javascript:void(0)">修改</a>
+            </div>
+            <div class="part5">
+                <h3>邮箱</h3>
+                <p class="email">mr.tankomo@foxmail.com</p>
+                <div id='emaillist' class='emaillist'></div>
+                <a href="javascript:void(0)">修改</a>
+            </div>
+        </div>
+        
+        <div class="security">
+            <h1>安全信息</h1>
+            <b>如您发现登录异常，请及时更改密码！</b>
+            <div class="loginIP">
+                <h3>登录IP</h3>
+                <ul style="margin-top:-24px">
+                </ul>
+            </div>
+            <a href="javascript:void(0)">修改密码</a>
+        </div>
+        
+        
+        <div class="sale-info">
+            <h1>我的在售</h1>
+            <div class="adjust"></div>
+            <table class="MyGoods">
+                <tr>
+                    <th>物品</th>
+                    <th>到期时间</th>
+                    <th>价格</th>
+                    <th>更多</th>
+                    <th>删除</th>
+                </tr>
+            </table>
+        </div>
+        
+
+        <div class="purchase-info">
+            <h1>已买物品</h1>
+            <div class="adjust"></div>
+            <table class="MyPurchase">
+                <tr>
+                    <th>物品</th>
+                    <th>卖家</th>
+                    <th>价格</th>
+                    <th>更多</th>
+                    <th>删除</th>
+                </tr>
+            </table>
+        </div>
+
+        <div class="likes-info">
+            <h1>我的收藏</h1>
+            <div class="adjust"></div>
+            <table class="MyLikes">
+                <tr>
+                    <th>物品</th>
+                    <th>卖家</th>
+                    <th>价格</th>
+                    <th>更多</th>
+                    <th>删除</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+      
+    {include file="common/foot" /}
+</body>
+</html>

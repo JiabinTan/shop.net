@@ -9,18 +9,16 @@ class Goods extends Controller
 {
     public function index()
     {
-    		$para=Request::instance()->param();
-    		$start=$para['items'];
+    	$para=Request::instance()->param();
+    	$start=$para['items'];
     		
         $model=new GoodsModel();
-        $good=$model->limit($start,50)->order('id','asc')->field('id,name,path,price,description,likes')->select();
-        
-        $count=$model->count();
-       
+        $good=$model->where('expire','>=',date('Y-m-d h:i:s'))->limit($start,50)->order('id','asc')->field('id,name,path,price,description,likes')->select();
+        $count=count($good);
        for($i=0;$i < $count;$i++)
        {
        		$goods[$i]=$good[$i]->toJson();
-       	}
+       }
        
         return	json(['status'=>'ok','count'=>$count,'goods'=>$goods,'isAll'=>$count<50]);
     }
@@ -37,5 +35,28 @@ class Goods extends Controller
         	return	json(['status'=>'ok','goods'=>$detail->toJson()]);
       	}
     }
+	public function search()
+    {
 
+		$para=Request::instance()->param();
+    	$start=$para['items'];
+		$tag=$para['tag'];
+    	if(!$tag)
+		{
+			return json(["status"=>"fail"]);
+		}
+        $model=new GoodsModel();
+        $good=$model->whereOr(
+		['tag1'=>$tag,
+		'tag2'=>$tag,
+		'tag3'=>$tag,
+		])->where('expire','>=',date('Y-m-d h:i:s'))->limit($start,50)->order('id','asc')->field('id,name,path,price,description,likes')->select();
+        $count=count($good);
+       for($i=0;$i < $count;$i++)
+       {
+       		$goods[$i]=$good[$i]->toJson();
+       }
+       
+        return	json(['status'=>'ok','count'=>$count,'goods'=>$goods,'isAll'=>$count<50]);
+	}
 }
