@@ -59,4 +59,32 @@ class Goods extends Controller
        
         return	json(['status'=>'ok','count'=>$count,'goods'=>$goods,'isAll'=>$count<50]);
 	}
+	public function sort()
+    {
+
+		$para=Request::instance()->param();
+		$start=$para['count'];
+    	$state=$para['status'];//1降序，2升序
+		$tag=$para['tag'];//0代表热度，1代表价格
+    	if($tag!='1'&&$tag!='0')
+		{
+			return json(["status"=>"fail"]);
+		}
+        $model=new GoodsModel();
+		if(0==$tag&&1==$state)
+			$good=$model->where('expire','>=',date('Y-m-d h:i:s'))->order('likes','asc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
+		else if('0'==$tag&&'2'==$state)
+			$good=$model->where('expire','>=',date('Y-m-d h:i:s'))->order('likes','desc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
+		else if(1==$tag&&1==$state)
+			$good=$model->where('expire','>=',date('Y-m-d h:i:s'))->order('price','asc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
+		else if(1==$tag&&2==$state)
+			$good=$model->where('expire','>=',date('Y-m-d h:i:s'))->order('price','desc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
+        $count=count($good);
+       for($i=0;$i < $count;$i++)
+       {
+       		$goods[$i]=$good[$i]->toJson();
+       }
+       
+        return	json(['status'=>'ok','count'=>$count,'goods'=>$goods,'isAll'=>$count<50]);
+	}
 }

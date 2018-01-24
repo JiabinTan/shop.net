@@ -17,8 +17,10 @@ class Userinfo extends Controller
 		$session_id=Session::get('id','personinfo');
 		$session_username=Session::get('username','personinfo');
 		if(!($session_id&&$session_username))
-			return json(["status"=>"fail","messege"=>"您的登录存在问题"]);
+			return json(["status"=>"fail","messege"=>"您的登录存在问题","id"=>$session_id,"user"=>$session_username]);
 		$userinfo=$user->field("username,email,contact,school,headshot,ip,likes,purchased")->find($session_id);
+		if(!$userinfo)
+			return json(["status"=>"fail","messege"=>"您的登录存在问题,无法获得对应信息"]);
 		$likes=explode(";",$userinfo->likes);
 		$purchase=explode(";",$userinfo->purchased);
 

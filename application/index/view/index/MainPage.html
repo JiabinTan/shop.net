@@ -134,6 +134,296 @@
             <div class="price"><div class="dec-price"><span>价格</span><img class="origin" src="__STATIC__/index/index/pic/direction.png" /></div><input type="number" placeholder="￥" min="0"/><span>—</span><input placeholder="￥" type="number" max="9999999999"/><input type="button" value="确定"/></div>
         </div>
     </div>
+    <script>
+        var collectionClass;
+        $(".collection-amount").mouseenter(function () {
+
+            $(".collection-amount img").removeClass("imgclick1").removeClass("imgclick2").removeClass("imgclick0");
+            //console.log("进入时，保留的内容");
+            //console.log(collectionClass);
+            if (collection_state == 2)
+                $(".collection-amount img").addClass("imgenter2").removeClass("origin");
+            else if (collection_state == 1)
+                $(".collection-amount img").addClass("imgenter1").removeClass("origin");
+            else
+                $(".collection-amount img").addClass("imgenter0").removeClass("origin");
+        });
+        $(".collection-amount").mouseleave(function () {
+            var _isclicked;//判断是否已经被点击，如果已经被点击，则不增加 origin class
+
+            //console.log("离开时，未处理保留的内容");
+            //console.log(collectionClass);
+            //$(".collection-amount img").attr("class", function (index, val) {
+            //    $(this).attr("class", "");
+            //    var classArr = val.split(' ');
+            //    console.log(classArr);
+            //    collectionClass = classArr.forEach(function (val, index) {
+            //        val.replace(/^imgenter/, "");
+            //    });
+            //});
+            //console.log("离开时，保留的内容");
+            //console.log(collectionClass);
+            //$(".collection-amount img").attr("class", collectionClass);
+            $(".collection-amount img").attr("class", function (index, re) {
+                var classArr = re.split(' ');
+                //console.log("雷属性数组");
+                //console.log(classArr);
+                $.each(classArr, function (index, val) {
+                    // console.log(val);
+                    _isclicked = /^imgclick/.test(val);
+                });
+            });
+            // console.log("是都已经点击");
+            //console.log(_isclicked);
+            var img = $(".collection-amount img");
+            if (0 == collection_state)
+                $(".collection-amount img").attr("class", "origin");
+            else
+                $(".collection-amount img").attr("class", collectionClass);
+            //if (collection_state == 2){
+
+
+            //        img.removeClass("imgenter2").removeClass("imgenter0").removeClass("imgenter1");
+            //        if (!_isclicked)
+            //            img.addClass("origin").removeClass("imgclick1").removeClass("imgclick2").removeClass("imgclick0");
+            //        isclick = false;
+
+            //}
+            //else if (collection_state == 1)
+            //{
+            //        img.removeClass("imgenter2").removeClass("imgenter0").removeClass("imgenter1");
+            //        if (!_isclicked)
+            //            img.addClass("origin").removeClass("imgclick1").removeClass("imgclick2").removeClass("imgclick0");
+            //        isclick = false;
+            //    }
+            //else{ 
+
+            //    img.removeClass("imgenter2").removeClass("imgenter0").removeClass("imgenter1");
+            //    if (!_isclicked)
+            //        img.addClass("origin").removeClass("imgclick1").removeClass("imgclick2").removeClass("imgclick0");
+            //    isclick = false;
+            //    }
+
+
+        });
+
+        $(".collection-amount").click(function () {
+            $(".collection-amount img").removeClass("imgenter0").removeClass("imgenter2").removeClass("imgenter1");
+            if (1 == price_state || price_state == 2) {
+                $(".dec-price img").removeClass("imgclick1").removeClass("imgclick2").addClass("origin");
+                $(".dec-price").css({
+                    "background-color": "white",
+                    "color": "black"
+                });
+                price_state = 0;
+            }
+            if (collection_state == 0) {
+                $(".collection-amount img").addClass("imgclick1").removeClass("origin");
+                $(".collection-amount").css({
+                    "background-color": "#e99009",
+                    "color": "white",
+                    "cursor": "pointer"
+                });
+                collection_state = 1;
+            }
+            else {
+                $(".collection-amount img").removeClass("origin")
+                if (collection_state == 1) {
+                    $(".collection-amount img").removeClass("imgclick0").removeClass("imgclick1").addClass("imgclick2");
+                    collection_state = 2;
+                }
+                else {
+                    $(".collection-amount img").removeClass("imgclick0").removeClass("imgclick2").addClass("imgclick1");
+                    collection_state = 1;
+                }
+            }
+            //collectionClass=$(".collection-amount img").attr("class")
+            isclick = true;
+            collectionClass = $(".collection-amount img").attr("class");
+            //console.log("点击后保留的内容");
+            //console.log(collectionClass);
+            //// console.log("点击后状态");
+            // console.log(collection_state);
+        });
+
+        var priceClass;
+        $(".dec-price").mouseenter(function () {
+
+            $(".dec-price img").removeClass("imgclick1").removeClass("imgclick2").removeClass("imgclick0");
+            //console.log("进入时，保留的内容");
+            //console.log(collectionClass);
+            if (price_state == 2)
+                $(".dec-price img").addClass("imgenter2").removeClass("origin");
+            else if (price_state == 1)
+                $(".dec-price img").addClass("imgenter1").removeClass("origin");
+            else
+                $(".dec-price img").addClass("imgenter0").removeClass("origin");
+        });
+        $(".dec-price").mouseleave(function () {
+            var _isclicked;//判断是否已经被点击，如果已经被点击，则不增加 origin class
+
+            //console.log("离开时，未处理保留的内容");
+            //console.log(collectionClass);
+            //$(".collection-amount img").attr("class", function (index, val) {
+            //    $(this).attr("class", "");
+            //    var classArr = val.split(' ');
+            //    console.log(classArr);
+            //    collectionClass = classArr.forEach(function (val, index) {
+            //        val.replace(/^imgenter/, "");
+            //    });
+            //});
+            //console.log("离开时，保留的内容");
+            //console.log(collectionClass);
+            //$(".collection-amount img").attr("class", collectionClass);
+            $(".dec-price img").attr("class", function (index, re) {
+                var classArr = re.split(' ');
+                //  console.log("雷属性数组");
+                //  console.log(classArr);
+                $.each(classArr, function (index, val) {
+                    //      console.log(val);
+                    _isclicked = /^imgclick/.test(val);
+                });
+            });
+            //console.log("是都已经点击");
+            // console.log(_isclicked);
+            var img = $(".dec-price img");
+            if (0 == price_state)
+                $(".dec-price img").attr("class", "origin");
+            else
+                $(".dec-price img").attr("class", priceClass);
+            //if (collection_state == 2){
+
+
+            //        img.removeClass("imgenter2").removeClass("imgenter0").removeClass("imgenter1");
+            //        if (!_isclicked)
+            //            img.addClass("origin").removeClass("imgclick1").removeClass("imgclick2").removeClass("imgclick0");
+            //        isclick = false;
+
+            //}
+            //else if (collection_state == 1)
+            //{
+            //        img.removeClass("imgenter2").removeClass("imgenter0").removeClass("imgenter1");
+            //        if (!_isclicked)
+            //            img.addClass("origin").removeClass("imgclick1").removeClass("imgclick2").removeClass("imgclick0");
+            //        isclick = false;
+            //    }
+            //else{ 
+
+            //    img.removeClass("imgenter2").removeClass("imgenter0").removeClass("imgenter1");
+            //    if (!_isclicked)
+            //        img.addClass("origin").removeClass("imgclick1").removeClass("imgclick2").removeClass("imgclick0");
+            //    isclick = false;
+            //    }
+
+
+        });
+
+        $(".dec-price").click(function () {
+            $(".dec-price img").removeClass("imgenter0").removeClass("imgenter2").removeClass("imgclick0").removeClass("imgenter1");
+            if (1 == collection_state || collection_state == 2) {
+                $(".collection-amount img").removeClass("imgclick1").removeClass("imgclick2").removeClass("imgclick0").addClass("origin");
+                $(".collection-amount").css({
+                    "background-color": "white",
+                    "color": "black"
+                });
+                collection_state = 0;
+            }
+            if (price_state == 0) {
+                $(".dec-price img").addClass("imgclick1").removeClass("origin");
+                $(".dec-price").css({
+                    "background-color": "#e99009",
+                    "color": "white",
+                    "cursor": "pointer"
+                });
+                price_state = 1;
+            }
+            else {
+                $(".dec-price img").removeClass("origin")
+                if (price_state == 1) {
+                    $(".dec-price img").removeClass("imgclick0").removeClass("imgclick1").addClass("imgclick2");
+                    price_state = 2;
+                }
+                else {
+                    $(".dec-price img").removeClass("imgclick0").removeClass("imgclick2").addClass("imgclick1");
+                    price_state = 1;
+                }
+            }
+            //priceClass=$(".dec-price img").attr("class")
+            isclick = true;
+            priceClass = $(".dec-price img").attr("class");
+            //console.log("点击后保留的内容");
+            //console.log(priceClass);
+            // console.log("点击后状态");
+            // console.log(price_state);
+
+            //ajax
+        });
+        $("div.collection-amount,div.price").click(
+                    function (e) {
+                        $(this).ready(function () {
+                            console.log("热度与价格状态");
+                            console.log(collection_state);
+                            console.log(price_state);
+                        });
+                        Icount = 0;
+                        var tag;//0代表热度，1代表价格
+                        if (e.currentTarget == $("div.collection-amount")[0])
+                            tag = 0;
+                        else if (e.currentTarget == $("div.price")[0])
+                            tag = 1;
+                        else return;
+                        var status;//状态，ase还是des
+                        if (0 == tag)
+                            status = collection_state;
+                        else if (1 == tag)
+                            status = price_state;
+                        $.ajax({
+                            url: "{:url('index/goods/sort')}",
+                            data: { 'status': status, 'tag': tag ,"count":Icount},
+                            success: function (data) {
+                                if ('ok' != data.status) {
+                                    return;
+                                }
+                                else {
+                                    var outer = document.getElementById("content");
+                                    var goods, strall, str, div, img;
+                                    console.log($("#content"));
+                                    $("#content").empty();
+                                    isAll = data.isAll;
+                                    goods = data.goods;
+                                    Icount += data.count;
+                                    console.log(data);
+                                    $(goods).each(function (index, item) {
+
+                                        item = JSON.parse(item);
+                                        strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p><img class='collection' src='__STATIC__/index/index/pic/collection.png'/>";
+                                        str = item.path.split(/\;|\；/);
+                                        div = document.createElement("div");
+                                        div.innerHTML = strall;
+                                        img = document.createElement("img");
+                                        img.setAttribute("src", str[1]);
+                                        img.setAttribute("id", item.id);
+                                        img.setAttribute("class", "content-img");
+                                        div.setAttribute("class", "content-div");
+                                        div.appendChild(img);
+                                        outer = document.getElementById("content");
+                                        outer.appendChild(div);
+                                    }
+                                    );
+                                    replaceFooter();
+
+                                }
+                            }
+                                  ,
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status);
+                                alert(XMLHttpRequest.readyState);
+                                alert(textStatus);
+                            },
+                        }
+                        );
+                    });
+    </script>
     <div class="blank_"></div>
 
 
