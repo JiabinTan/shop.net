@@ -27,14 +27,20 @@ class Userinfo extends Controller
 		
 		$likes_count=count($likes);
 		$purchase_count=count($purchase);
-		for($i=1;$i<$likes_count;$i++)
-		{
-			$likesinfo[$i-1]=$goods->field("name,owner,price")->find($likes[$i]);
-		}
-		for($i=1;$i<$purchase_count;$i++)
-		{
-			$purchaseinfo[$i-1]=$goods->field("name,owner,price")->find($purchase[$i]);
-		}
+		if($likes_count>1)
+			for($i=1;$i<$likes_count;$i++)
+			{
+				$likesinfo[$i-1]=$goods->field("name,owner,price")->find($likes[$i]);
+			}
+		else
+			$likesinfo=null;
+		if($purchase_count>1)
+			for($i=1;$i<$purchase_count;$i++)
+			{
+				$purchaseinfo[$i-1]=$goods->field("name,owner,price")->find($purchase[$i]);
+			}
+		else
+			$purchaseinfo=null;
 		
 		$goodinfo=$goods->where("owner_id",$session_id)->field("name,expire,price")->select();
 		$data=["userinfo"=>$userinfo->toJson(),"goodsinfo"=>json_encode($goodinfo),"likesinfo"=>json_encode($likesinfo),"purchaseinfo"=>json_encode($purchaseinfo)];

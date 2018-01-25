@@ -447,12 +447,39 @@
                 <p class="expire"><span>过期时间:</span><span class="expire-time"></span></p>
                 <p class="desc" style="display:block"><span>商品描述:</span><span style="display:block;text-indent:2em" class="desc"></span></p>
             </div>
-            <input type="button" value="买" />
+            <input type="button" class="buy" value="买" />
         </div>
         <div class="close-table"><p>×</p></div>
     </div>
 
+    <script>
 
+        $(".commodity-detail .commodity input[type='button']").on('click', function () {
+            if (confirm("是否确认发送购买意愿（以及您的联系方式）至对方邮箱，同时您也将获取对方联系方式？"))
+            {
+                $.ajax({
+                    url: "{:url('index/goods/buy')}",
+                    data: { 'id': $(".commodity-detail").attr("good_id") },
+                    success: function (data) {
+                        if ('ok' == data.status) {
+                            alert("双方的信息已发送至对方邮箱！\n之后你们可以通过联系确认交易地址，如对该订单存在疑惑请即使客服！");
+                            return;
+                        }
+                        else {
+                            alert(data.messege);
+                            return;
+                        }
+                    }
+                  ,
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest.status);
+                        alert(XMLHttpRequest.readyState);
+                        alert(textStatus);
+                    },
+                });
+            }
+        })
+    </script>
 
     <script type="text/javascript">
         var detailUrl = "{:url('index/goods/detail')}";

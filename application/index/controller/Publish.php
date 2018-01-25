@@ -74,16 +74,15 @@ class Publish extends Controller
 		//dump($request);
 		$info=json_decode($request->param()['goodInfo']);
 		$cate=$info->cate;
+		$cate=mb_eregi_replace('\；',";",$cate);
 		$tags=explode(';',$cate,3);
 		if(empty($tags))
 		{
-			$tags=explode('；',$cate,3);
-			if(empty($tags))
-			{
+			
 			$status='fail';
 			$messege="商品标签必须";
 			return json(['status'=>$status,'messege'=>$messege,'url'=>"\\"]);
-			}
+			
 		}
 		
 		$good->name=$info->name;
@@ -110,6 +109,8 @@ class Publish extends Controller
 		else{
 			$status='ok';
 			$messege="上传完成";
+			$url=url("index/publish/jump");
+			header("Location:$url");
 		}
 		if(false==$good->save())
 		{

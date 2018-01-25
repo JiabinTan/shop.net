@@ -3,6 +3,7 @@ namespace app\index\controller;
 use \think\Controller;
 use \think\Session;
 use \think\Cookie;
+use \think\Request;
 use \app\index\model\Index as IndModel;
 class Index extends Controller
 {
@@ -19,7 +20,6 @@ class Index extends Controller
 		Cookie::clear('autolog_');
 		Session::clear("personinfo");
 		$url=url("\\");
-		echo $url;
 		header("Location:$url");
 	}
 	public function getSession()
@@ -40,7 +40,26 @@ class Index extends Controller
 				{
 					Session::set('id',$info['id'],'personinfo');
 					Session::set('username',$info['username'],'personinfo');
-			
+
+					$req=Request::instance();
+					$time=date("Y-m-d H:i:s",$req->time());
+					$ip=$req->ip();
+					$wip=";".$ip."'".$time."'" . "浙江杭州";
+					$oldIp=$info->ip;
+					$oldIps=explode(';',$oldIp);
+					$count=count($oldIps);
+					if($count>5)
+					{
+						for($i=1;$i<$count-4;$i++)
+						{
+							unset($oldIps[$i]);
+						}
+					};
+					$oldIp=implode(';',$oldIps);
+					$newIp=$oldIp . $wip;
+					$info->ip=$newIp;
+					$info->save();
+
 					return json(['status'=>'ok','username'=>$info['username'],'id'=>$info['id']]);
 				}
 				else

@@ -46,7 +46,7 @@
                 <label for="RemPSW" id="remLB">记住密码</label>
             </span>
             <span id="linkPSW">
-                <a id="forgetPSW" href="http://baidu.com">忘记密码</a>
+                <a id="forgetPSW" href="#">忘记密码</a>
             </span>
             <div id="submitcontain">
                 <input id="submit" tabindex="4" type="button" value="提    交" />
@@ -55,7 +55,38 @@
             <hr id="cut-line" />
             <a href="javascript::void(0)"><img id="login-QQ" src="__STATIC__/index/index/pic/login-QQ.png" /></a>
         </form>
+        
         <script>
+            //忘记密码
+
+            $('#linkPSW').click(
+            function () {
+                var r = confirm("是否重置密码，重置后新密码将发送至您的邮箱？");
+                if (r = true) {
+                    var username = prompt("您输入您的用户名");
+                    if (!username)
+                        return;
+                    $.ajax(
+                   {
+                   url: "{:url('index/login/forget')}",
+                   data: {"username":username},
+                   type: "POST",
+                   dataType: "json",
+                   success: function (data) {
+                       alert("状态："+data.status+"\n详细："+data.messege);
+                   }
+                  ,
+                   error: function (XMLHttpRequest, textStatus, errorThrown) {
+                       alert(XMLHttpRequest.status);
+                       alert(XMLHttpRequest.readyState);
+                       alert(textStatus);
+                   },
+               });
+
+                }
+                else
+                    return;
+            });
             $('#submitcontain #close').click(
                 function(){
                         $("#iframe_log", parent.document).hide();

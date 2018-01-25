@@ -60,37 +60,42 @@
                             var expire;
                             var price;
                             var owner;
-                            for (var i = 0; i < goodsinfo.length; i++)
-                            {
-                                name = goodsinfo[i].name;
-                                expire = goodsinfo[i].expire;
-                                price = goodsinfo[i].price;
-                                var tr = document.createElement("tr");
-                                var str = '<td>' + name + '</td>' + "<td>" + expire + "</td>" + "<td>" + price + "</td>" + "<td><a src='javascript:void(0)'>详细信息</a></td><td><a src='javascript:void(0)'>Del</a></td>";
-                                $(tr).html(str);
-                                $(".sale-info .MyGoods").append(tr);
+
+                            if (!goodsinfo.length) {
+                                
+                                for (var i = 0; i < goodsinfo.length; i++) {
+                                    name = goodsinfo[i].name;
+                                    expire = goodsinfo[i].expire;
+                                    price = goodsinfo[i].price;
+                                    var tr = document.createElement("tr");
+                                    var str = '<td>' + name + '</td>' + "<td>" + expire + "</td>" + "<td>" + price + "</td>" + "<td><a src='javascript:void(0)'>详细信息</a></td><td><a src='javascript:void(0)'>Del</a></td>";
+                                    $(tr).html(str);
+                                    $(".sale-info .MyGoods").append(tr);
+                                }
                             }
-                            console.log();
                             // <!--已买物品AJAX-->
-                            for (var i = 0; i < purchaseinfo.length; i++) {
-                                name = purchaseinfo[i].name;
-                                owner = purchaseinfo[i].owner;
-                                price = purchaseinfo[i].price;
-                                var tr = document.createElement("tr");
-                                var str = '<td>' + name + '</td>' + "<td>" + owner + "</td>" + "<td>" + price + "</td>" + "<td><a src='javascript:void(0)'>详细信息</a></td><td><a src='javascript:void(0)'>Del</a></td>";
-                                $(tr).html(str);
-                                $(".purchase-info .MyPurchase   ").append(tr);
+                            if (null!=purchaseinfo) {
+                                for (var i = 0; i < purchaseinfo.length; i++) {
+                                    name = purchaseinfo[i].name;
+                                    owner = purchaseinfo[i].owner;
+                                    price = purchaseinfo[i].price;
+                                    var tr = document.createElement("tr");
+                                    var str = '<td>' + name + '</td>' + "<td>" + owner + "</td>" + "<td>" + price + "</td>" + "<td><a src='javascript:void(0)'>详细信息</a></td><td><a src='javascript:void(0)'>Del</a></td>";
+                                    $(tr).html(str);
+                                    $(".purchase-info .MyPurchase   ").append(tr);
+                                }
                             }
                             //收藏的物品
-                            
-                            for (var i = 0; i < likesinfo.length; i++) {
-                                name = likesinfo[i].name;
-                                owner = likesinfo[i].owner;
-                                price = likesinfo[i].price;
-                                var tr = document.createElement("tr");
-                                var str = '<td>' + name + '</td>' + "<td>" + owner + "</td>" + "<td>" + price + "</td>" + "<td><a src='javascript:void(0)'>详细信息</a></td><td><a src='javascript:void(0)'>Del</a></td>";
-                                $(tr).html(str);
-                                $(".likes-info .MyLikes").append(tr);
+                            if (null!=likesinfo) {
+                                for (var i = 0; i < likesinfo.length; i++) {
+                                    name = likesinfo[i].name;
+                                    owner = likesinfo[i].owner;
+                                    price = likesinfo[i].price;
+                                    var tr = document.createElement("tr");
+                                    var str = '<td>' + name + '</td>' + "<td>" + owner + "</td>" + "<td>" + price + "</td>" + "<td><a src='javascript:void(0)'>详细信息</a></td><td><a src='javascript:void(0)'>Del</a></td>";
+                                    $(tr).html(str);
+                                    $(".likes-info .MyLikes").append(tr);
+                                }
                             }
                             
                         }

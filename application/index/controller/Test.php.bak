@@ -48,17 +48,18 @@ class Test
     }
 	function index()
 	{
-		/*return preg_replace_callback('/[\x{3000}\x{ff01}-\x{ff5f}]/',function($matches)
+		dump(";");
+		dump("；");
+		$str="你好；我很好；他也好";
+		dump($str);
+		str_replace(';', '；', $str); 
+		dump($str);
+		dump("你好;我很好;他也好");
+		return preg_replace_callback('/[\x{3000}\x{ff01}-\x{ff5f}]/',function($matches)
 		{
-			($unicode=char2Unicode($matches[0])) == 0x3000 ? " " : (($code=$unicode-0xfee0) > 256 ? unicode2Char($code) : chr($code));
+			($unicode=char2Unicode('0')) == 0x3000 ? " " : (($code=$unicode-0xfee0) > 256 ? unicode2Char($code) : chr($code));
 
 		},$str);
-		*/
-		$str="asd；d十大；不啊好低啊";
 
-		echo urlencode("年后");
-		echo "<br/>";
-		echo utf8_decode("\你");
-		//preg_replace_callback('//');
 	}
 }

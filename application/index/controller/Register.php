@@ -23,8 +23,9 @@ class Register extends Controller
 	}
 	public function reg()
 	{ 
+		$req=Request::instance();
 		$validate=\think\Loader::validate('Register');
-		$data=Request::instance()->param();
+		$data=$req->param();
 		if($data['password']!=$data['password-again'])
 			return json(['status'=>'fail','messege'=>'password entered twice is not same!']);
 		if($validate->rule([
@@ -35,7 +36,15 @@ class Register extends Controller
 		
 		if($validate->check($data))
 		{
+			
+			$time=date("Y-m-d H:i:s",$req->time());
+			$ip=$req->ip();
+			//地址后期完善
+			$wip=";".$ip."'".$time."'" . "浙江杭州";
+					
+			
 			$reg=new RegModel();
+			$reg->ip=$wip;
 			$reg->username=$data['username'];
 			$reg->password=$data['password'];
 			$reg->email=$data['email'];
@@ -51,11 +60,12 @@ class Register extends Controller
 				{
 					
 					$id=$reg->id;
-					
+					$email_token=MD5(time()+(int)$id);
+					$reg->where("id",$id)->update(["email_token"=>$email_token]);
 					Session::set('id',$id,'personinfo');
 					Session::set('username',$reg->username,'personinfo');
 					
-					$url='http://www.funnywtx.com'.url('index/register/checkmail','id='.$id);
+					$url='http://www.funnywtx.com'.url('index/register/checkmail',['id'=>$id,'email_token'=>$email_token]);
 					$date=date('Y');
 					$messege="<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'><html xmlns='http://www.w3.org/1999/xhtml'><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8' /><title>W.T.X</title><meta name='viewport' content='width=device-width, initial-scale=1.0' /></head><body style='padding:0;margin:0'><table border='0' cellpadding='0' cellspacing='0' width='100%'><tr><td>
                 <table align='center' border='1' cellpadding='0' cellspacing='0' width='600' style='border-collapse: collapse;'>
@@ -68,7 +78,7 @@ class Register extends Controller
                         <td  bgcolor='#ffffff' style='border:none'>
                             <p style='margin:5px;color:#000000;font-size:18px'>尊敬的:KOMO</p>
                             <p style='margin-left:50px;margin-top:50px;margin-right:50px;margin-bottom:40px;text-align:center'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;欢迎注册W.T.X账号，请点击一下链接完成注册：<b style='font-size:12px'><br/>（如非本人操作请忽视本条消息）</b></p>
-                            <p style='text-align:center;margin-top:-20px;margin-bottom:50px' ><a href='{$url}'>".'http://www.funnywtx.com'.	url('index/register/checkmail','id='.$id)."</a></p>
+                            <p style='text-align:center;margin-top:-20px;margin-bottom:50px' ><a href='{$url}'>".'http://www.funnywtx.com'.	url('index/register/checkmail',['id'=>$id,'email_token'=>$email_token])."</a></p>
                         </td>
                     </tr>
                     <tr style='border:0'>
@@ -117,7 +127,7 @@ class Register extends Controller
             $mail->Body = $messege;// 邮件正文  
             //$mail->AltBody = "This is the plain text纯文本";// 这个是设置纯文本方式显示的正文内容，如果不支持Html方式，就会用到这个，基本无用  
   
-            if($mail->send()){// 发送邮件  
+            if($mail->send()){// 发送邮件
                  return  json(["status"=>'ok',"messege"=>$messege]);
             }else{  
             		return	json(['status'=>'fail','messege'=>'opps!mail is failed to send, please get contact with us.']);    
@@ -132,11 +142,11 @@ class Register extends Controller
 			return json(['status'=>'fail','messege'=>'your infomation is not matched to our requirement, please try again!']);
 	}
 
-	public function checkMail($id)
+	public function checkMail($id,$email_token)
 	{
 		$reg=new RegModel();
 		$update=$reg->get($id);
-		if($update->email_state==0)
+		if(($update->email_state==0)&&($update->email_token==$email_token))
 			{
 				$update->update(['email_state'=>1],['id'=>$id]);
 				return $this->fetch('mail_ok');
