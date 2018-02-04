@@ -30,7 +30,10 @@ class Index extends Controller
 		$session_username=Session::get('username','personinfo');
 		if($session_id&&$session_username)
 		{
-			return json(['status'=>'ok','username'=>$session_username,'id'=>$session_id]);
+			$user_model=new IndModel();
+			$user=$user_model->get($session_id);
+			$headshot=$user->headshot;
+			return json(['status'=>'ok','username'=>$session_username,'id'=>$session_id,"src"=>$headshot]);
 		}
 		else if($autolog_username&&$autolog_token)
 			{
@@ -40,7 +43,7 @@ class Index extends Controller
 				{
 					Session::set('id',$info['id'],'personinfo');
 					Session::set('username',$info['username'],'personinfo');
-
+					$headshot=$info->headshot;
 					$req=Request::instance();
 					$time=date("Y-m-d H:i:s",$req->time());
 					$ip=$req->ip();
@@ -60,7 +63,7 @@ class Index extends Controller
 					$info->ip=$newIp;
 					$info->save();
 
-					return json(['status'=>'ok','username'=>$info['username'],'id'=>$info['id']]);
+					return json(['status'=>'ok','username'=>$info['username'],'id'=>$info['id'],"src"=>$headshot]);
 				}
 				else
 					return json(['status'=>'fail']);

@@ -19,7 +19,6 @@
                 $.ajax(
                 {
                     url: "{:url('index/userinfo/getinfo')}",
-
                     success: function (data) {
                         if ('fail' == data.status) {
                             alert(data.messege);
@@ -30,9 +29,13 @@
                             var goodsinfo = JSON.parse(data.data.goodsinfo);
                             var likesinfo = JSON.parse(data.data.likesinfo);
                             var purchaseinfo = JSON.parse(data.data.purchaseinfo);
+                            console.log("用户信息");
                             console.log(userinfo);
+                            console.log("在售信息");
                             console.log(goodsinfo);
+                            console.log("收藏信息");
                             console.log(likesinfo);
+                            console.log("购买信息");
                             console.log(purchaseinfo);
                             var ips = userinfo.ip;
                             //ip需要处理ip与时间在一起
@@ -45,55 +48,82 @@
                                 var addr = info[2];
                                 str += "<li><span class='time'>" + time + "</span><span class='ip'>" + ip + "</span><span class='addr'>" + addr + "</span></li>";
                             }
-                            $("div.security div.loginIP ul").append(str);
+                            $("div.security div.loginIP ul").empty().append(str);
 
                             //我的信息
                             var contact = userinfo.contact;
                             var username = userinfo.username;
                             var email = userinfo.email;
-                            var headshot = userinfo.heashot;
+                            var headshot = userinfo.headshot;
                             var school = userinfo.school;
-                            
+                            var id = userinfo.id;
+                            var email_state=userinfo.email_state
+                            $("div.part1 img.headshot").attr("src", headshot);
+                            $("div.part2 p.username").text(username);
+                            $("div.part3 p.school").text(school);
+                            $("div.part4 p.contact").text(contact);
+                            $("div.part5 p.email").text(email);
+                            $("div.part0 p.id").text(id);
+                            if ('0' == email_state) {
+                                $("div.part6 a").attr("email_state", "0");
+                                $("div.part6 p.email_state").text("邮箱未激活");
+                            }
+                            else if ('1' == email_state) {
+                                $("div.part6 a").remove();
+                                $("div.part6 p.email_state").text("邮箱已激活");
+                            }
+                            else
+                                return;
 
-                            //<!--在售商品AJAX-->
-                            var name;
+
+                                //<!--在售商品AJAX-->
+                                var name;
                             var expire;
                             var price;
                             var owner;
-
-                            if (!goodsinfo.length) {
-                                
+                            console.log("商品信息长度");
+                            console.log(goodsinfo.length);
+                            $(".sale-info .MyGoods .tr").not(".title").remove();
+                            if (goodsinfo.length) {
                                 for (var i = 0; i < goodsinfo.length; i++) {
                                     name = goodsinfo[i].name;
                                     expire = goodsinfo[i].expire;
                                     price = goodsinfo[i].price;
                                     var tr = document.createElement("tr");
-                                    var str = '<td>' + name + '</td>' + "<td>" + expire + "</td>" + "<td>" + price + "</td>" + "<td><a src='javascript:void(0)'>详细信息</a></td><td><a src='javascript:void(0)'>Del</a></td>";
+                                    tr.setAttribute("good_id", goodsinfo[i].id);
+                                    var str = '<td>' + name + '</td>' + "<td>" + expire + "</td>" + "<td>" + price + "</td>" + "<td><a class='more' src='javascript:void(0)'>详细信息</a></td><td><a class='del' src='javascript:void(0)'>Del</a></td>";
                                     $(tr).html(str);
+                                    
                                     $(".sale-info .MyGoods").append(tr);
                                 }
                             }
                             // <!--已买物品AJAX-->
+                            $(".purchase-info .MyPurchase .tr").not(".title").remove();
                             if (null!=purchaseinfo) {
                                 for (var i = 0; i < purchaseinfo.length; i++) {
                                     name = purchaseinfo[i].name;
                                     owner = purchaseinfo[i].owner;
                                     price = purchaseinfo[i].price;
                                     var tr = document.createElement("tr");
-                                    var str = '<td>' + name + '</td>' + "<td>" + owner + "</td>" + "<td>" + price + "</td>" + "<td><a src='javascript:void(0)'>详细信息</a></td><td><a src='javascript:void(0)'>Del</a></td>";
+                                    tr.setAttribute("good_id", purchaseinfo[i].id);
+                                    var str = '<td>' + name + '</td>' + "<td>" + owner + "</td>" + "<td>" + price + "</td>" + "<td><a class='more' src='javascript:void(0)'>详细信息</a></td><td><a class='del'  src='javascript:void(0)'>Del</a></td>";
                                     $(tr).html(str);
-                                    $(".purchase-info .MyPurchase   ").append(tr);
+                                    
+                                    $(".purchase-info .MyPurchase").append(tr);
                                 }
                             }
                             //收藏的物品
+                            $(".likes-info .MyLikes .tr").not(".title").remove();
                             if (null!=likesinfo) {
                                 for (var i = 0; i < likesinfo.length; i++) {
                                     name = likesinfo[i].name;
                                     owner = likesinfo[i].owner;
                                     price = likesinfo[i].price;
                                     var tr = document.createElement("tr");
-                                    var str = '<td>' + name + '</td>' + "<td>" + owner + "</td>" + "<td>" + price + "</td>" + "<td><a src='javascript:void(0)'>详细信息</a></td><td><a src='javascript:void(0)'>Del</a></td>";
+                                    tr.setAttribute("good_id",likesinfo[i].id);
+                                    var str = '<td>' + name + '</td>' + "<td>" + owner + "</td>" + "<td>" + price + "</td>" + "<td><a class='more' src='javascript:void(0)'>详细信息</a></td><td><a src='javascript:void(0)' class='del'>Del</a></td>";
                                     $(tr).html(str);
+                                    
                                     $(".likes-info .MyLikes").append(tr);
                                 }
                             }
@@ -106,6 +136,244 @@
                         alert(XMLHttpRequest.readyState);
                         alert(textStatus);
                     },
+                });
+                var old_info, new_info;
+
+                //修改个人信息
+                $(document).on("click", ".basic-info a,.basic-info p",
+                    function () {
+                        if ($(this).is($(".basic-info a:first"))) {
+                            //需要使用AJAX更新头像
+                            // $(this).append("<input type=>");
+                        }
+                        else if ($(this).is($("div.part6 p.email_state,div.part0 p.id")))
+                        {
+                            return;
+                        }
+                        else if ($(this).is($("div.part6 a")))
+                        {
+                            if ($(this).attr("email_state") == "0")
+                                $.ajax(
+                                {
+                                    url: "{:url('index/userinfo/updateinfo')}",
+                                    data: { "sel": 5 },
+                                    type: "get",
+                                    success: function (data) {
+                                        if ("ok" == data.status) {
+                                            return;
+                                        }
+                                        else {
+                                            alert(data.messege);
+                                            //修改为已经激活
+                                        }
+                                    }
+                                    ,
+                                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                        alert(XMLHttpRequest.status);
+                                        alert(XMLHttpRequest.readyState);
+                                        alert(textStatus);
+                                    },
+                                });
+                            else {
+                                alert("邮箱已激活无需再次激活！");
+                                return;
+                            }
+                        }
+                        else {
+                            var ele = $(this).parent().children("p");
+                            var old_info = ele.text();
+                            str = "<input type='text'class='com_input' value=" + old_info + " />" + "<input type='image'src='" + "__STATIC__" + "/userinfo/pic/ok.png'/>";
+
+                            ele.replaceWith(str);
+                        }
+                    });
+                var img;//图片
+                var _imgIsChanged = false;
+                $("input[type = 'file']").change(
+                    function () {
+                        img = $(this)[0].files["0"];
+                        var imgUrl = window.URL.createObjectURL(img);
+                        $("div.part1 img.headshot").attr("src",imgUrl);
+                        //alert($(this).val());
+                        _imgIsChanged = true;
+                    }
+                );
+                $("div.part1 a").click(function () {
+                    if (_imgIsChanged) {
+                        _imgIsChanged = false;
+                        var formdata = new FormData();
+                        formdata.append("sel", "4");
+                        console.log("图片信息");
+                        console.log(img);
+                        formdata.append("file", img);
+                        $.ajax(
+                       {
+                           url: "{:url('index/userinfo/updateinfo')}",
+                           data: formdata,
+                           type: "post",
+                           processData: false,
+                           contentType: false,
+                           cache: false,
+                           success: function (data) {
+                               if ("ok" == data.status) {
+                                   //alert("头像更新成功");
+                                   return;
+                               }
+                               else {
+                                   return;
+                               }
+                           }
+                      ,
+                           error: function (XMLHttpRequest, textStatus, errorThrown) {
+                               alert(XMLHttpRequest.status);
+                               alert(XMLHttpRequest.readyState);
+                               alert(textStatus);
+                           },
+                       });
+                    }
+                });
+                //处理信息更新
+                $(document).on("click", "input[type='image']", function () {
+                    var self = $(this);
+                    var ele_t = $(this).parent().children("input[type='text']");
+                    var new_info = ele_t.val();
+                    var sel;//0用户名，1学校，2联系方式，3邮箱，4头像；
+                    console.log("新内容");
+                    console.log(new_info);
+                    if ("part2" == $(this).parent().attr("class"))
+                        sel = 0;
+                    else if ("part3" == $(this).parent().attr("class"))
+                        sel = 1;
+                    else if ("part4" == $(this).parent().attr("class"))
+                        sel = 2;
+                    else if ("part5" == $(this).parent().attr("class"))
+                        sel = 3;
+                    $.ajax(
+                    {
+                    url: "{:url('index/userinfo/updateinfo')}",
+                    data: { "text": new_info, "sel": sel },
+                    type: "get",
+                    success: function (data) {
+                        if ("ok" == data.status) {
+                            str = "<p>" + new_info + "</p>";
+                            ele_t.replaceWith(str);
+                            self.remove();
+                        }
+                        else {
+                            str = "<p>" + old_info + "</p>";
+                            ele_t.replaceWith(str);
+                            self.remove();
+                        }
+                    }
+                   ,
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest.status);
+                        alert(XMLHttpRequest.readyState);
+                        alert(textStatus);
+                    },
+                });
+                });
+
+
+                $(document).on("click", "table tr td a.del", function (e) {
+                    console.log("查看tr元素");
+                    console.log($(".purchase-info .MyLikes tr"));
+                    console.log("查看not选择元素");
+                    console.log($(".purchase-info .MyLikes tr").not(".title"));
+                    var good_id = $(this).parents("tr").attr("good_id");
+                    console.log("商品id");
+                    console.log(good_id);
+                    var sel;//删除的内容,0我的物品，1我的已买，2我的收藏
+                    if ($(this).parents(".MyGoods").length != 0)//w我的物品
+                        sel = 0;
+                    else if ($(this).parents(".MyPurchase").length != 0)
+                        sel = 1;
+                    else if($(this).parents(".MyLikes").length != 0)
+                        sel = 2
+                    console.log("选择是"+sel);
+
+
+                    
+                    $.ajax(
+                {
+                    url: "{:url('index/userinfo/delete')}",
+                    data: { "id": good_id, "sel": sel },
+                    type:"get",
+                    success: function (data) {
+                        var info = JSON.parse(data.info);
+                        var name;
+                        var expire;
+                        var price;
+                        var owner;
+                        if ('fail' == data.status) {
+                            alert(data.messege)
+                            //window.location.href = "{:url('/')}";
+                        }
+                        else {
+                            console.log("delete后接收的信息信息");
+                            console.log(data);
+                            if(0==sel)
+                            {
+                                $(".sale-info .MyGoods  tr").not(".title").remove();
+                                if (info.length && !info) {
+                                    for (var i = 0; i < info.length; i++) {
+                                        name = info[i].name;
+                                        expire = info[i].expire;
+                                        price = info[i].price;
+                                        var tr = document.createElement("tr");
+                                        tr.setAttribute("good_id", info[i].id);
+                                        var str = '<td>' + name + '</td>' + "<td>" + expire + "</td>" + "<td>" + price + "</td>" + "<td><a class='more' src='javascript:void(0)'>详细信息</a></td><td><a class='del' src='javascript:void(0)'>Del</a></td>";
+                                        $(tr).html(str);
+                                    
+                                        $(".sale-info .MyGoods").append(tr);
+                                    }
+                                }
+                            }
+                            else if(1==sel)
+                            {
+                                $(".purchase-info .MyPurchase tr").not(".title").remove();
+                                if (null != info) {
+                                    for (var i = 0; i < info.length; i++) {
+                                        name = info[i].name;
+                                        owner = info[i].owner;
+                                        price = info[i].price;
+                                        var tr = document.createElement("tr");
+                                        tr.setAttribute("good_id", info[i].id);
+                                        var str = '<td>' + name + '</td>' + "<td>" + owner + "</td>" + "<td>" + price + "</td>" + "<td><a class='more' src='javascript:void(0)'>详细信息</a></td><td><a class='del'  src='javascript:void(0)'>Del</a></td>";
+                                        $(tr).html(str);
+
+                                        $(".purchase-info .MyPurchase").append(tr);
+                                    }
+                                }
+                            }
+                            else if (2 == sel)
+                            {
+                                $(".likes-info .MyLikes  tr").not(".title").remove();
+                                if (null != info) {
+                                    for (var i = 0; i < info.length; i++) {
+                                        name = info[i].name;
+                                        owner = info[i].owner;
+                                        price = info[i].price;
+                                        var tr = document.createElement("tr");
+                                        tr.setAttribute("good_id", info[i].id);
+                                        var str = '<td>' + name + '</td>' + "<td>" + owner + "</td>" + "<td>" + price + "</td>" + "<td><a class='more' src='javascript:void(0)'>详细信息</a></td><td><a src='javascript:void(0)' class='del'>Del</a></td>";
+                                        $(tr).html(str);
+
+                                        $(".likes-info .MyLikes").append(tr);
+                                    }
+                                }
+                            }
+                                //reload three info part
+
+                        }
+                    }
+                   ,
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest.status);
+                        alert(XMLHttpRequest.readyState);
+                        alert(textStatus);
+                    },
+                });
                 });
                 $.ajax(
                 {
@@ -147,9 +415,14 @@
                 </div>
                 <div class="thumbnail"></div>
             </div>
-            <p class="likes"><span>likes:</span><span class="amount"></span></p>
-            <p class="expire"><span>过期时间:</span><span class="expire-time"></span></p>
-            <input type="button" value="买" />
+            <div class="good_info">
+                <p class="likes"><span>收藏量:</span><span class="amount"></span></p>
+                <p class="info_price"><span>价格:</span><span class="info_price"></span></p>
+                <p class="saller"><span>卖家:</span><span class="saller"></span></p>
+                <p class="expire"><span>过期时间:</span><span class="expire-time"></span></p>
+                <p class="desc" style="display:block"><span>商品描述:</span><span style="display:block;text-indent:2em" class="desc"></span></p>
+            </div>
+            <input type="button" class="buy" value="买" />
         </div>
         <div class="close-table"><p>×</p></div>
     </div>
@@ -160,11 +433,13 @@
             <tr>
                 <th>物品</th>
                 <th>到期时间</th>
-                <th>状态</th>
-                <th>购买者</th>
+                <th>收藏量</th>
+                <th>价格</th>
+                <th>卖家</th>
+                <th>卖家邮箱</th>
                 <th>联系方式</th>
-                <th>所在学校</th>
-                <th>对方邮箱</th>
+               
+                
             </tr>
         </table>
     </div>
@@ -173,16 +448,270 @@
         <table class="MyGoods">
             <tr>
                 <th>物品</th>
-                <th>到期时间</th>
+                <th>收藏量</th>
+                <th>价格</th>
                 <th>卖家</th>
+                <th>卖家邮箱</th>
                 <th>联系方式</th>
-                <th>所在学校</th>
-                <th>对方邮箱</th>
+                
                 <th><a href="javascript:void(0)">商品页面</a></th>
             </tr>
         </table>
     </div>
+    <script>
+        //AJAX 点击我在售物品
+        $(document).on("click", ".MyGoods tr td a.more", function () {
+            var self = $(this);
+            $.ajax(
+                       {
+                           url: "{:url('index/userinfo/getbuyinfo')}",
+                           data: self.parent().attr("good_id"),
+                           type: "post",
+                           success: function (data) {
+                               if ("ok" == data.status) {
+                                   console.log("返回的购买信息");
+                                   console.log(data);
+                                   $(".top-bar ,.bkground-image,.slogan,.nav-main,.info-black,.foot,.qq").css("filter", "blur(10px)");
+                                   var good = JSON.parse(data.goodinfo);
+                                   var user = JSON.parse(data.userinfo);
+                                   var expire = good.expire;
+                                   var owner = good.owner;
+                                   var name = good.name;
+                                   var price = good.price;
+                                   var likes = good.likes;
+                                   var email = user.email;
+                                   var contact = user.contact;
+                                   var id = good.id;
+                                   var tr = document.createElement("tr");
 
+
+                                   var str = '<td>' + name + '</td>' + "<td>" + expire + "</td>" + "<td>" + likes + "</td>" + "<td>" + price + "</td>" + '<td>' + owner + '</td>' + '<td>' + email + '</td>' + "<td>" + contact + "</td>";
+                                   $(tr).html(str);
+                                   $(".sale-detail .MyGoods").attr("good_id",id).css("visibility", "visible").append(tr);
+                                   $(".sale-detail .close-table").css(
+                                   {
+                                       "visibility": "visible",
+                                       "left": String(document.body.offsetWidth / 2 + 400 - 35) + "px",
+                                       "top": String(window.innerHeight / 2 - 26.8 - 35) + "px"
+                                   });
+                                   //alert("头像更新成功");
+                                   return;
+                               }
+                               else {
+                                   alert(data.messege);
+                                   return;
+                               }
+                           }
+                      ,
+                           error: function (XMLHttpRequest, textStatus, errorThrown) {
+                               alert(XMLHttpRequest.status);
+                               alert(XMLHttpRequest.readyState);
+                               alert(textStatus);
+                           },
+                       });
+            
+        });
+        $(".sale-detail .close-table").click(function () {
+            $("div.sale-detail table tr").eq(0).siblings().remove();
+            $(".top-bar ,.bkground-image,.slogan,.nav-main,.info-black,.foot,.qq").css("filter", "none");
+            //
+            $(".sale-detail .MyGoods").css("visibility", "hidden").find("td").remove();
+            $(".sale-detail .close-table").css("visibility", "hidden");
+        });
+        //AJAX显示已购买物品
+        $(document).on("click", ".purchase-info .MyPurchase  tr td a.more", function () {
+            var self = $(this);
+            $.ajax(
+                       {
+                           url: "{:url('index/userinfo/getbuyinfo')}",
+                           data: self.parent().attr("good_id"),
+                           type: "post",
+                           success: function (data) {
+                               if ("ok" == data.status) {
+                                   console.log("返回的购买信息");
+                                   console.log(data);
+                                   $(".top-bar ,.bkground-image,.slogan,.nav-main,.info-black,.foot,.qq").css("filter", "blur(10px)");
+                                   var good = JSON.parse(data.goodinfo);
+                                   var user = JSON.parse(data.userinfo);
+                                   var expire = good.expire;
+                                   var owner = good.owner;
+                                   var name = good.name;
+                                   var price = good.price;
+                                   var likes = good.likes;
+                                   var email = user.email;
+                                   var contact = user.contact;
+                                   var id = good.id;
+                                   var tr = document.createElement("tr");
+                                   var str = '<td>' + name + '</td>' + "<td>" + likes + "</td>" + "<td>" + price + "</td>" + "<td>" + owner + "</td>" + '<td>' + email + '</td>' + "<td>" + contact + "</td>"+"<td></td>";
+
+                                   $(tr).html(str);
+                                   $(".purchase-detail .MyGoods").attr("good_id", id).css("visibility", "visible").append(tr);
+                                   $(".purchase-detail .close-table").css(
+                                   {
+                                       "visibility": "visible",
+                                       "left": String(document.body.offsetWidth / 2 + 400 - 35) + "px",
+                                       "top": String(window.innerHeight / 2 - 26.8 - 35) + "px"
+                                   });
+
+                                   //alert("头像更新成功");
+                                   return;
+                               }
+                               else {
+                                   alert(data.messege);
+                                   return;
+                               }
+                           }
+                      ,
+                           error: function (XMLHttpRequest, textStatus, errorThrown) {
+                               alert(XMLHttpRequest.status);
+                               alert(XMLHttpRequest.readyState);
+                               alert(textStatus);
+                           },
+                       });
+
+           
+        });
+        $(".purchase-detail .close-table").click(function () {
+            $("div.purchase-detail table tr").eq(0).siblings().remove();
+            $(".top-bar ,.bkground-image,.slogan,.nav-main,.info-black,.foot,.qq").css("filter", "none");
+            //
+            $(".purchase-detail .MyGoods").css("visibility", "hidden").find("td").remove();
+            $(".purchase-detail .close-table").css("visibility", "hidden");
+        });
+
+
+        //AJAX显示已收藏物品
+        $(document).on("click", ".likes-info .MyLikes  tr td a.more", function () {
+            $(".top-bar ,.search-box,.blank_,.content,.slogan,.nav-main,.foot,.qq").css("filter", "blur(10px)");
+            $(".commodity-detail").css("visibility", "visible");
+            $(".commodity-detail .close-table").css("visibility", "visible");
+            var id = $(this).parent().attr('good_id');
+
+
+            $.ajax({
+                url: "{:url('index/goods/detail')}",
+                data: { 'id': id },
+                success: function (data) {
+                    if ('ok' != data.status) {
+                        alert("（未知错误）未查询到相关信息");
+                        return;
+                    }
+                    else {
+                        info = JSON.parse(data.goods);
+                        console.log("返回的商品信息");
+                        console.log(info);
+                        $(".commodity-detail").attr("good_id", info.id);
+                        $(".commodity-detail .commodity .title").text(info.name);
+                        $(".commodity-detail .commodity .likes .amount").text(info.likes);
+                        $(".commodity-detail .commodity .expire .expire-time").text(info.expire);
+
+                        $(".commodity-detail .commodity .info_price .info_price").text(info.price);
+                        $(".commodity-detail .commodity .saller .saller").text(info.owner);
+                        $(".commodity-detail .commodity .desc .desc").text(info.description);
+
+                        $(".commodity-detail .commodity .name").text(info.owner);
+                        var str1 = "<img src='/static/common/Pic/fill.png' flag='0'/>";
+                        $(str1).appendTo(".commodity-detail .commodity .pictures .picture-container");
+                        var str = info.path.split(/\;|\；/);
+                        console.log("处理后得到的路径信息");
+                        console.log(str);
+                        end = str.length - 2;
+
+                        for (var i = 1; i <= end; i++) {
+                            var img = document.createElement("img");
+                            $(img).attr({ "src": str[i + 1], "title": "点击查看大图" }).appendTo(".commodity-detail .commodity .pictures .picture-container");
+                        }
+                        $(str1).appendTo(".commodity-detail .commodity .pictures .picture-container");
+                        $(".commodity-detail .commodity .pictures .picture-container").css("width", String(352 * 5) + "px");
+                        $(".content div .content-img").on("click", evenstop);
+                        $(".commodity-detail .commodity .pictures img").eq(1).css("border", "2px orange solid");
+                        if (end < 1) {
+                            $(".commodity-detail .commodity .pictures .picture-container").ready(function () {
+                                alert("卖家没有上传详细图片,请谨慎选择该商品");
+                            });
+
+                        }
+
+                    }
+                }
+                       ,
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.status);
+                    alert(XMLHttpRequest.readyState);
+                    alert(textStatus);
+                },
+
+            });
+
+
+        });
+
+        //AJAX处理商品页
+        $(document).on("click", "div.purchase-detail table tr th a", function () {
+                $(".top-bar ,.search-box,.blank_,.content,.slogan,.nav-main,.foot,.qq").css("filter", "blur(10px)");
+                $(".commodity-detail").css("visibility", "visible");
+                $(".commodity-detail .close-table").css("visibility", "visible");
+                var id=$(this).parents("table").attr('good_id');
+        
+        
+                $.ajax({
+                    url: "{:url('index/goods/detail')}",
+                    data: { 'id': id },
+                    success: function (data) {
+                        if ('ok'!= data.status) {
+                            alert("（未知错误）未查询到相关信息");
+                            return;
+                        }
+                        else {
+                            info = JSON.parse(data.goods);
+                            console.log("商品信息");
+                            console.log(info);
+                            $(".commodity-detail").attr("good_id",info.id);
+                            $(".commodity-detail .commodity .title").text(info.name);
+                            $(".commodity-detail .commodity .likes .amount").text(info.likes);
+                            $(".commodity-detail .commodity .expire .expire-time").text(info.expire);
+
+                            $(".commodity-detail .commodity .info_price .info_price").text(info.price);
+                            $(".commodity-detail .commodity .saller .saller").text(info.owner);
+                            $(".commodity-detail .commodity .desc .desc").text(info.description);
+
+                            $(".commodity-detail .commodity .name").text(info.owner);
+                            var str1 = "<img src='/static/common/Pic/fill.png' flag='0'/>";
+                            $(str1).appendTo(".commodity-detail .commodity .pictures .picture-container");
+                            var str = info.path.split(/\;|\；/);
+                            console.log("路径信息");
+                            console.log(str);
+                            end = str.length - 2;
+                    
+                            for (var i = 1; i <= end; i++) {
+                                var img = document.createElement("img");
+                                $(img).attr({ "src": str[i+1], "title": "点击查看大图" }).appendTo(".commodity-detail .commodity .pictures .picture-container");
+                            }
+                            $(str1).appendTo(".commodity-detail .commodity .pictures .picture-container");
+                            $(".commodity-detail .commodity .pictures .picture-container").css("width", String(352 * 5) + "px");
+                            $(".content div .content-img").on("click", evenstop);
+                            $(".commodity-detail .commodity .pictures img").eq(1).css("border", "2px orange solid");
+                            if (end < 1)
+                            {
+                                $(".commodity-detail .commodity .pictures .picture-container").ready(function () {
+                                    alert("卖家没有上传详细图片,请谨慎选择该商品");
+                                });
+                        
+                            }
+
+                        }
+                    }
+                           ,
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest.status);
+                        alert(XMLHttpRequest.readyState);
+                        alert(textStatus);
+                    },
+
+                });
+        });
+
+    </script>
     <div class="slogan"><img src="__STATIC__/userinfo/pic/slogan.png" /></div>
     {include file="common/slide" /}
     
@@ -197,21 +726,26 @@
     <div class="info-black">
         <div class="basic-info">
             <h1>基本信息</h1>
-            <div class="part1">
+            <div class="part0" style="position: relative;top: 214px;">
+                <h3>id</h3>
+                <p class="id"></p>
+           </div>
+            <div class="part1"style="    position: relative;top: -62px;">
                 <h3>头像</h3>
-                <img class="headshot"src="__STATIC__/userinfo/pic/2014001313895746404551930294844.jpg" />
+                <img class="headshot"src="javascript:void(0)" />
                 <input type="file" accept="image/jpeg,image/jpg,image/png" />
                 <br/>
                 <a href="javascript:void(0)">修改</a>
             </div>
+            
             <div class="part2">
                 <h3>用户名</h3>
-                <p class="username">KOMO</p>
+                <p class="username"></p>
                 <a href="javascript:void(0)">修改</a>
             </div>
             <div class="part3">
                 <h3>学校</h3>
-                <p class="school">uestc</p>
+                <p class="school"></p>
                 <div id="proSchool" class="provinceSchool">
                     <div class="title"><span>请选择学校</span></div>
                     <div class="proSelect">
@@ -231,14 +765,19 @@
             </div>
             <div class="part4">
                 <h3>联系方式</h3>
-                <p class="contact">1035844563</p>
+                <p class="contact"></p>
                 <a href="javascript:void(0)">修改</a>
             </div>
             <div class="part5">
                 <h3>邮箱</h3>
-                <p class="email">mr.tankomo@foxmail.com</p>
+                <p class="email"></p>
                 <div id='emaillist' class='emaillist'></div>
                 <a href="javascript:void(0)">修改</a>
+            </div>
+            <div class="part6" style="margin-bottom:25px">
+                <h3>邮箱状态</h3>
+                <p class="email_state"></p>
+                <a href="javascript:void(0)">验证</a>
             </div>
         </div>
         
@@ -252,13 +791,42 @@
             </div>
             <a href="javascript:void(0)">修改密码</a>
         </div>
-        
+        <script>
+            $("div.security a").click(function () {
+                var oldPassword = prompt("您的原密码是");
+                var newPassword = prompt("您的新密码是");
+                var againPassword = prompt("您的新密码是");
+                $.ajax(
+                       {
+                           url: "{:url('index/userinfo/modpassword')}",
+                           data: {"old":oldPassword,"new":newPassword,"again":againPassword},
+                           type: "post",
+                           success: function (data) {
+                               if ("ok" == data.status) {
+                                   //alert("头像更新成功");
+                                   alert("更新成功！");
+                                   return;
+                               }
+                               else {
+                                   alert(data.messege)
+                                   return;
+                               }
+                           }
+                      ,
+                           error: function (XMLHttpRequest, textStatus, errorThrown) {
+                               alert(XMLHttpRequest.status);
+                               alert(XMLHttpRequest.readyState);
+                               alert(textStatus);
+                           },
+                       });
+            });
+        </script>
         
         <div class="sale-info">
             <h1>我的在售</h1>
             <div class="adjust"></div>
             <table class="MyGoods">
-                <tr>
+                <tr class="title">
                     <th>物品</th>
                     <th>到期时间</th>
                     <th>价格</th>
@@ -273,7 +841,7 @@
             <h1>已买物品</h1>
             <div class="adjust"></div>
             <table class="MyPurchase">
-                <tr>
+                <tr class="title">
                     <th>物品</th>
                     <th>卖家</th>
                     <th>价格</th>
@@ -287,7 +855,7 @@
             <h1>我的收藏</h1>
             <div class="adjust"></div>
             <table class="MyLikes">
-                <tr>
+                <tr class="title">
                     <th>物品</th>
                     <th>卖家</th>
                     <th>价格</th>

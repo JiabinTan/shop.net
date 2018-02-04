@@ -14,6 +14,10 @@
 </head>
 <body>
     <script>
+        
+        var isAll = false;//is all good loaded?
+        var search_tag;//搜索内容记录
+        var _lastOp=0;//根据上一个操作，判断是否需要将isAll置零，0登录加载，1搜索加载，2排序价格升序加载，3排序价格降序加载，4排序收藏升序加载，5排序收藏降序加载
         $(document).ready(
             function () {
                 $.ajax(
@@ -28,12 +32,12 @@
                             var username = data.username;
                             var id = data.id;
                             $("div.top-bar input , div.top-bar a").remove();
-                            //var src = "'" + data.src + "'";
-                            src = "__STATIC__/index/index/pic/1.jpg";
+                            var src = data.src;
+                            //var src = "__STATIC__/index/index/pic/1.jpg";
                             $("<img class='headshot' src='" + src + "'/>").appendTo("div.top-bar");
                             $("<div class='info-block'><p class='name'>" + username + "</p><p class='ID'>" + id + "</p>" + "<a href='javascript::void(0)' class='logout'>登出</a>" + "</div>").appendTo("div.top-bar");
                             $(".nav-ul li a span.person-info").text("个人主页");
-                            $(".nav-ul li a .headshot img").attr("src", "__STATIC__/index/index/pic/1.jpg");
+                            $(".nav-ul li a .headshot img").attr("src", src);
                         }
                     }
                    ,
@@ -74,33 +78,49 @@
             <input type="text" class="search-content" placeholder="输入你需要的物品" />
             <input class="search" type="button" value="搜  索" />
             <script>
+                //根据上一个操作，判断是否需要将isAll置零，0登录加载，1搜索加载，2排序价格升序加载，3排序价格降序加载，4排序收藏升序加载，5排序收藏降序加载,6范围
                 $("input.search").click(
                     function (e) {
-                        var tag = $("input.search-content").val();
+                            isAll=false;
+                            Icount=0;
+                            _lastOp=1;
+                        search_tag = $("input.search-content").val();
+                        if (!tag)
+                            return;
+                        console.log("content内容");
                         console.log(content);
                         var Icount = 0;
-                        var isAll = false;
-
                         $.ajax({
                             url: "{:url('index/goods/search')}",
-                            data: { 'items': Icount, 'tag': tag },
+                            data: { 'items': Icount, 'tag': search_tag },
                             success: function (data) {
                                 if ('ok' != data.status) {
                                     return;
                                 }
                                 else {
+                                    var ids = data.likes;
                                     var outer = document.getElementById("content");
                                     var goods, strall, str, div, img;
+                                    console.log("#content整个元素");
                                     console.log($("#content"));
                                     $("#content").empty();
                                     isAll = data.isAll;
                                     goods = data.goods;
                                     Icount += data.count;
+                                    console.log("返回信息");
                                     console.log(data);
                                     $(goods).each(function (index, item) {
-
                                         item = JSON.parse(item);
-                                        strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p><img class='collection' src='__STATIC__/index/index/pic/collection.png'/>";
+                                        if (ids.length) {
+                                            if (-1 == ids.findIndex(function (ele) { return ele == item.id }))
+                                                imgStr = "<img class='collection' style='background-color:white' src='__STATIC__/index/index/pic/collection.png'/>";
+                                            else
+                                                imgStr = "<img class='collection' style='background-color:yellow' src='__STATIC__/index/index/pic/collection.png'/>";
+                                            strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p>" + imgStr;
+                                        }
+                                        else {
+                                            strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p><img class='collection' src='__STATIC__/index/index/pic/collection.png'/>";
+                                        }
                                         str = item.path.split(/\;|\；/);
                                         div = document.createElement("div");
                                         div.innerHTML = strall;
@@ -131,11 +151,77 @@
         </div>
         <div class="ex-requires">
             <div class="collection-amount"><span>热度</span><img class="origin" src="__STATIC__/index/index/pic/direction.png" /></div>
-            <div class="price"><div class="dec-price"><span>价格</span><img class="origin" src="__STATIC__/index/index/pic/direction.png" /></div><input type="number" placeholder="￥" min="0"/><span>—</span><input placeholder="￥" type="number" max="9999999999"/><input type="button" value="确定"/></div>
+            <div class="price"><div class="dec-price"><span>价格</span><img class="origin" src="__STATIC__/index/index/pic/direction.png" /></div><input type="number" placeholder="￥" class="price_min" min="0"/><span>—</span><input placeholder="￥" class="price_max" type="number" max="9999999999"/><input type="button" id="price_range" value="确定"/></div>
         </div>
     </div>
     <script>
         var collectionClass;
+        $("#price_range").click(function () {
+                isAll = false;
+                Icount = 0;
+                _lastOp = 6;
+            var min=$("div.ex-requires div.price input.price_min").val();
+            var max = $("div.ex-requires div.price input.price_max").val();
+            console.log("加载的数量");
+            console.log(Icount);
+            $.ajax({
+                url: "{:url('index/goods/range')}",
+                data: {'items': Icount, 'min': min, 'max': max },
+                type:"post",
+                success: function (data) {
+                    if ('ok' != data.status) {
+                        return;
+                    }
+                    else {
+                        var ids = data.likes;
+                        var outer = document.getElementById("content");
+                        var goods, strall, str, div, img;
+                        console.log("整个content元素");
+                        console.log($("#content"));
+                        $("#content").empty();
+                        isAll = data.isAll;
+                        goods = data.goods;
+                        Icount += data.count;
+                        console.log("返回的信息");
+                        console.log(data);
+                        $(goods).each(function (index, item) {
+                            item = JSON.parse(item);
+                            if (ids.length) {
+                                if (-1 == ids.findIndex(function (ele) { return ele == item.id }))
+                                    imgStr = "<img class='collection' style='background-color:white' src='__STATIC__/index/index/pic/collection.png'/>";
+                                else
+                                    imgStr = "<img class='collection' style='background-color:yellow' src='__STATIC__/index/index/pic/collection.png'/>";
+                                strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p>" + imgStr;
+                            }
+                            else {
+                                strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p><img class='collection' src='__STATIC__/index/index/pic/collection.png'/>";
+                            }
+                            str = item.path.split(/\;|\；/);
+                            div = document.createElement("div");
+                            div.innerHTML = strall;
+                            img = document.createElement("img");
+                            img.setAttribute("src", str[1]);
+                            img.setAttribute("id", item.id);
+                            img.setAttribute("class", "content-img");
+                            div.setAttribute("class", "content-div");
+                            div.appendChild(img);
+                            outer = document.getElementById("content");
+                            outer.appendChild(div);
+                        }
+                        );
+                        replaceFooter();
+
+                    }
+                }
+                                  ,
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.status);
+                    alert(XMLHttpRequest.readyState);
+                    alert(textStatus);
+                },
+            }
+                        );
+        });
         $(".collection-amount").mouseenter(function () {
 
             $(".collection-amount img").removeClass("imgclick1").removeClass("imgclick2").removeClass("imgclick0");
@@ -358,7 +444,7 @@
 
             //ajax
         });
-        $("div.collection-amount,div.price").click(
+        $("div.collection-amount,div.price div.dec-price").click(
                     function (e) {
                         $(this).ready(function () {
                             console.log("热度与价格状态");
@@ -373,13 +459,35 @@
                             tag = 1;
                         else return;
                         var status;//状态，ase还是des
+                        //根据上一个操作，判断是否需要将isAll置零，0登录加载，1搜索加载，2排序价格升序加载，3排序价格降序加载，4排序收藏升序加载，5排序收藏降序加载
                         if (0 == tag)
                             status = collection_state;
                         else if (1 == tag)
                             status = price_state;
+                        if (tag == 0 && status == 1) {
+                                isAll = false;
+                                _lastOp = 4;
+                                Icount = 0;
+                        }
+                        else if (tag == 0 && status == 2) {
+                                isAll = false;
+                                _lastOp = 5;
+                                Icount = 0;
+                            
+                        }
+                        else if (tag == 1 && status == 1) {
+                                isAll = false;
+                                _lastOp = 2;
+                                Icount = 0;
+                        }
+                        else if (tag == 1 && status == 2) {
+                                isAll = false;
+                                _lastOp = 3;
+                                Icount = 0;
+                        }
                         $.ajax({
                             url: "{:url('index/goods/sort')}",
-                            data: { 'status': status, 'tag': tag ,"count":Icount},
+                            data: { 'status': status, 'tag': tag ,"count":Icount,"search_tag":search_tag?search_tag:""},
                             success: function (data) {
                                 if ('ok' != data.status) {
                                     return;
@@ -387,16 +495,27 @@
                                 else {
                                     var outer = document.getElementById("content");
                                     var goods, strall, str, div, img;
+                                    var ids = data.likes;
+                                    console.log("#content元素");
                                     console.log($("#content"));
                                     $("#content").empty();
                                     isAll = data.isAll;
                                     goods = data.goods;
                                     Icount += data.count;
+                                    console.log("返回的信息");
                                     console.log(data);
                                     $(goods).each(function (index, item) {
-
                                         item = JSON.parse(item);
-                                        strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p><img class='collection' src='__STATIC__/index/index/pic/collection.png'/>";
+                                        if (ids.length) {
+                                            if (-1 == ids.findIndex(function (ele) { return ele == item.id }))
+                                                imgStr = "<img class='collection' style='background-color:white' src='__STATIC__/index/index/pic/collection.png'/>";
+                                            else
+                                                imgStr = "<img class='collection' style='background-color:yellow' src='__STATIC__/index/index/pic/collection.png'/>";
+                                            strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p>" + imgStr;
+                                        }
+                                        else {
+                                            strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p><img class='collection' src='__STATIC__/index/index/pic/collection.png'/>";
+                                        }
                                         str = item.path.split(/\;|\；/);
                                         div = document.createElement("div");
                                         div.innerHTML = strall;
@@ -429,6 +548,65 @@
 
     <!--商品详情页-->
     <div class="content" id="content"></div>
+    <script>
+        $(document).on("click", "img.collection", function () {
+            var self = $(this);
+            var color = RGBtoHEX($(this).css("background-color"));
+            console.log("颜色是" + color);
+            if ("#FFFFFF" == color) {
+                var good_id=$(this).next().attr("good_id");
+                $.ajax({
+                    url: "{:url('index/goods/like')}",
+                    data: { 'id':good_id,"select":0 },//0添加，1删除
+                    success: function (data) {
+                        if ('ok' == data.status) {
+                            //console.log(this);
+                            self.css("background-color", "yellow");
+                            return;
+                        }
+                        else {
+                            //console.log(data.messege);
+                            alert(data.messege);
+                            return;
+                        }
+                    }
+                 ,
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest.status);
+                        alert(XMLHttpRequest.readyState);
+                        alert(textStatus);
+                    },
+                });
+
+            }
+            else
+            {
+                var good_id = $(this).next().attr("good_id");
+                $.ajax({
+                    url: "{:url('index/goods/like')}",
+                    data: { 'id': good_id, "select": 1 },
+                    success: function (data) {
+                        if ('ok' == data.status) {
+                            self.css("background-color", "white");
+                            return;
+                        }
+                        else {
+                            alert(data.messege);
+                            return;
+                        }
+                    }
+                 ,
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest.status);
+                        alert(XMLHttpRequest.readyState);
+                        alert(textStatus);
+                    },
+                });
+
+            }
+
+        });
+    </script>
     <div class="commodity-detail">
         <div class="commodity">
             <h1 class="title"></h1>
@@ -494,22 +672,36 @@
                     return;
                 }
                 else {
+                    _lastOp = 0;
+                    isAll = false;
+                    Icount = 0;
+                    var ids = data.likes;
+                    console.log("返回的信息");
+                    console.log(data);
                     isAll = data.isAll;
                     goods = data.goods;
                     Icount += data.count;
-                    var goods,strall,str,div,img;
+                    var goods,strall,str,div,img,imgStr;
                     var outer = document.getElementById("content");
                     $(goods).each(function (index, item) {
-
                         item = JSON.parse(item);
-                        strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p><img class='collection' src='__STATIC__/index/index/pic/collection.png'/>";
-                        str = item.path.split(/\;|\；/);
+                        if (ids.length) {
+                            if (-1 == ids.findIndex(function (ele) { return ele == item.id }))
+                                imgStr = "<img class='collection' style='background-color:white' src='__STATIC__/index/index/pic/collection.png'/>";
+                            else
+                                imgStr = "<img class='collection' style='background-color:yellow' src='__STATIC__/index/index/pic/collection.png'/>";
+                            strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p>" + imgStr;
+                        }
+                        else {
+                            strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p><img class='collection' src='__STATIC__/index/index/pic/collection.png'/>";
+                        }
+                        str = item.path.split(/\;/);
                         div = document.createElement("div");
                         div.innerHTML = strall;
                         img = document.createElement("img");
                         img.setAttribute("src", str[1]);
-                        img.setAttribute("id", item.id);
-                        img.setAttribute("class", "content-img");
+                        img.setAttribute("good_id", item.id);
+                        img.setAttribute("class", "content-img"); 
                         div.setAttribute("class", "content-div");
                         div.appendChild(img);
                         
@@ -517,7 +709,8 @@
                     }
                     );
                     replaceFooter();
-
+                    console.log("是否全部加载完毕");
+                    console.log(isAll); 
                 }
             }
                   ,
@@ -529,16 +722,18 @@
         });
     </script>
     <script type="text/javascript">
-        function loading()
-        {
+        $(window).scroll(loading);
+        function loading() {
             var WinHeight = document.documentElement.clientHeight;
             var DocHeight = document.documentElement.scrollHeight;
             var OffSet = document.documentElement.scrollTop;
             if (Math.abs(DocHeight - (OffSet + WinHeight)) < 1) {
+                console.log("是否全部加载完毕");
+                console.log(isAll);
                 _isLoading = true;
-                $(window).unbind("scroll",loading);
+                $(window).unbind("scroll", loading);
                 var outer = $("#content");
-                $("<img src='__STATIC__/index/index/pic/loading.gif' class='loading' />").css({
+                $("<img src='Pic/loading.gif' class='loading' />").css({
                     'border-radius': '50%',
                     'height': '38px',
                     'width': '38px',
@@ -546,23 +741,321 @@
                     'bottom': '-27px',
                     'left': "497px"
                 }).appendTo(outer);
-               // $("div.foot").css("top", "32px");
-               //console.log('4...');
-               $("div.foot").offset({ top: $("div.content").height() + $("div.content").offset().top+32, left: $("div.foot").offset().left });
-                $.post("here is target file", String(ComNum), function (data) {
-                    if ("OK") {
-                        //添加元素
-                        ComNum += data.Num;
-                        _isLoading = false;
-                        $("div.foot").css("top", "0px");
-                        $("#content img.loading").remove();
-                        $(window).bind("scroll", loading);
+                // $("div.foot").css("top", "32px");
+                $("div.foot").offset({ top: $("div.content").height() + $("div.content").offset().top + 32, left: $("div.foot").offset().left });
+                if (!isAll) {
+                    if (_lastOp == 0) {
+                        $.ajax({
+                            url: "{:url('index/goods/index')}",
+                            data: { 'items': Icount },
+                            success: function (data) {
+                                if ('ok' != data.status) {
+                                    return;
+                                }
+                                else {
+                                    if (_lastOp != 0) {
+                                        _lastOp = 0;
+                                        isAll = false;
+                                        Icount = 0;
+                                    }
+                                    var ids = data.likes;
+                                    console.log("返回的信息");
+                                    console.log(data);
+                                    isAll = data.isAll;
+                                    goods = data.goods;
+                                    Icount += data.count;
+                                    var goods, strall, str, div, img, imgStr;
+                                    var outer = document.getElementById("content");
+                                    $(goods).each(function (index, item) {
+                                        item = JSON.parse(item);
+                                        if (ids.length) {
+                                            if (-1 == ids.findIndex(function (ele) { return ele == item.id }))
+                                                imgStr = "<img class='collection' style='background-color:white' src='__STATIC__/index/index/pic/collection.png'/>";
+                                            else
+                                                imgStr = "<img class='collection' style='background-color:yellow' src='__STATIC__/index/index/pic/collection.png'/>";
+                                            strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p>" + imgStr;
+                                        }
+                                        else {
+                                            strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p><img class='collection' src='__STATIC__/index/index/pic/collection.png'/>";
+                                        }
+                                        str = item.path.split(/\;/);
+                                        div = document.createElement("div");
+                                        div.innerHTML = strall;
+                                        img = document.createElement("img");
+                                        img.setAttribute("src", str[1]);
+                                        img.setAttribute("good_id", item.id);
+                                        img.setAttribute("class", "content-img");
+                                        div.setAttribute("class", "content-div");
+                                        div.appendChild(img);
+
+                                        outer.appendChild(div);
+                                    }
+                                    );
+                                    replaceFooter();
+                                    _isLoading = false;
+                                    $("div.foot").css("top", "0px");
+                                    $("#content img.loading").remove();
+                                    $(window).bind("scroll", loading);
+                                }
+                            }
+                      ,
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status);
+                                alert(XMLHttpRequest.readyState);
+                                alert(textStatus);
+                            },
+                        });
                     }
-                });
+                    else if (1 == _lastOp) {
+                        if (_lastOp != 1) {
+                            isAll = false;
+                            Icount = 0;
+                            _lastOp = 1;
+                        }
+                        search_tag = $("input.search-content").val();
+                        if (!tag)
+                            return;
+                        console.log("content内容，不知道是什么内容，应该在别的文件注释了");
+                        console.log(content);
+                        var Icount = 0;
+                        $.ajax({
+                            url: "{:url('index/goods/search')}",
+                            data: { 'items': Icount, 'tag': search_tag },
+                            success: function (data) {
+                                if ('ok' != data.status) {
+                                    return;
+                                }
+                                else {
+                                    var ids = data.likes;
+                                    var outer = document.getElementById("content");
+                                    var goods, strall, str, div, img;
+                                    console.log("#content元素");
+                                    console.log($("#content"));
+                                    $("#content").empty();
+                                    isAll = data.isAll;
+                                    goods = data.goods;
+                                    Icount += data.count;
+                                    console.log("返回的信息");
+                                    console.log(data);
+                                    $(goods).each(function (index, item) {
+                                        item = JSON.parse(item);
+                                        if (ids.length) {
+                                            if (-1 == ids.findIndex(function (ele) { return ele == item.id }))
+                                                imgStr = "<img class='collection' style='background-color:white' src='__STATIC__/index/index/pic/collection.png'/>";
+                                            else
+                                                imgStr = "<img class='collection' style='background-color:yellow' src='__STATIC__/index/index/pic/collection.png'/>";
+                                            strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p>" + imgStr;
+                                        }
+                                        else {
+                                            strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p><img class='collection' src='__STATIC__/index/index/pic/collection.png'/>";
+                                        }
+                                        str = item.path.split(/\;|\；/);
+                                        div = document.createElement("div");
+                                        div.innerHTML = strall;
+                                        img = document.createElement("img");
+                                        img.setAttribute("src", str[1]);
+                                        img.setAttribute("id", item.id);
+                                        img.setAttribute("class", "content-img");
+                                        div.setAttribute("class", "content-div");
+                                        div.appendChild(img);
+                                        outer = document.getElementById("content");
+                                        outer.appendChild(div);
+                                    }
+                                    );
+                                    replaceFooter();
+                                    _isLoading = false;
+                                    $("div.foot").css("top", "0px");
+                                    $("#content img.loading").remove();
+                                    $(window).bind("scroll", loading);
+                                }
+                            }
+                                  ,
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status);
+                                alert(XMLHttpRequest.readyState);
+                                alert(textStatus);
+                            },
+                        }
+                        );
+                    }
+                    else if (6 == _lastOp)
+                    {
+                        if (_lastOp != 6) {
+                            isAll = false;
+                            Icount = 0;
+                            _lastOp = 6;
+                        }
+                        var min = $("div.ex-requires div.price input.price_min").val();
+                        var max = $("div.ex-requires div.price input.price_max").val();
+                        $.ajax({
+                            url: "{:url('index/goods/range')}",
+                            data: { 'items': Icount, 'min': min, 'max': max },
+                            type: "post",
+                            success: function (data) {
+                                if ('ok' != data.status) {
+                                    return;
+                                }
+                                else {
+                                    var ids = data.likes;
+                                    var outer = document.getElementById("content");
+                                    var goods, strall, str, div, img;
+                                    console.log("#content元素");
+                                    console.log($("#content"));
+                                    $("#content").empty();
+                                    isAll = data.isAll;
+                                    goods = data.goods;
+                                    Icount += data.count;
+                                    console.log("返回的信息");
+                                    console.log(data);
+                                    $(goods).each(function (index, item) {
+                                        item = JSON.parse(item);
+                                        if (ids.length) {
+                                            if (-1 == ids.findIndex(function (ele) { return ele == item.id }))
+                                                imgStr = "<img class='collection' style='background-color:white' src='__STATIC__/index/index/pic/collection.png'/>";
+                                            else
+                                                imgStr = "<img class='collection' style='background-color:yellow' src='__STATIC__/index/index/pic/collection.png'/>";
+                                            strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p>" + imgStr;
+                                        }
+                                        else {
+                                            strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p><img class='collection' src='__STATIC__/index/index/pic/collection.png'/>";
+                                        }
+                                        str = item.path.split(/\;|\；/);
+                                        div = document.createElement("div");
+                                        div.innerHTML = strall;
+                                        img = document.createElement("img");
+                                        img.setAttribute("src", str[1]);
+                                        img.setAttribute("id", item.id);
+                                        img.setAttribute("class", "content-img");
+                                        div.setAttribute("class", "content-div");
+                                        div.appendChild(img);
+                                        outer = document.getElementById("content");
+                                        outer.appendChild(div);
+                                    }
+                                    );
+                                    replaceFooter();
+
+                                }
+                            }
+                                              ,
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status);
+                                alert(XMLHttpRequest.readyState);
+                                alert(textStatus);
+                            },
+                        }
+                                    );
+                    }
+                    else {
+                        $(this).ready(function () {
+                            console.log("热度与价格状态");
+                            console.log(collection_state);
+                            console.log(price_state);
+                        });
+                        Icount = 0;
+                        var tag;//0代表热度，1代表价格
+                        if (e.currentTarget == $("div.collection-amount")[0])
+                            tag = 0;
+                        else if (e.currentTarget == $("div.price")[0])
+                            tag = 1;
+                        else return;
+                        var status;//状态，ase还是des
+                        //根据上一个操作，判断是否需要将isAll置零，0登录加载，1搜索加载，2排序价格升序加载，3排序价格降序加载，4排序收藏升序加载，5排序收藏降序加载
+                        if (0 == tag)
+                            status = collection_state;
+                        else if (1 == tag)
+                            status = price_state;
+                        if (tag == 0 && status == 1) {
+                            if (4 != _lastOp) {
+                                isAll = false;
+                                _lastOp = 4;
+                                Icount = 0;
+                            }
+                        }
+                        else if (tag == 0 && status == 2) {
+                            if (5 != _lastOp) {
+                                isAll = false;
+                                _lastOp = 5;
+                                Icount = 0;
+                            }
+                        }
+                        else if (tag == 1 && status == 1) {
+                            if (2 != _lastOp) {
+                                isAll = false;
+                                _lastOp = 2;
+                                Icount = 0;
+                            }
+                        }
+                        else if (tag == 1 && status == 2) {
+                            if (3 != _lastOp) {
+                                isAll = false;
+                                _lastOp = 3;
+                                Icount = 0;
+                            }
+                        }
+                        $.ajax({
+                            url: "{:url('index/goods/sort')}",
+                            data: { 'status': status, 'tag': tag, "count": Icount, "search_tag": search_tag ? search_tag : "" },
+                            success: function (data) {
+                                if ('ok' != data.status) {
+                                    return;
+                                }
+                                else {
+                                    var outer = document.getElementById("content");
+                                    var goods, strall, str, div, img;
+                                    var ids = data.likes;
+                                    console.log("#content元素");
+                                    console.log($("#content"));
+                                    $("#content").empty();
+                                    isAll = data.isAll;
+                                    goods = data.goods;
+                                    Icount += data.count;
+                                    console.log("返回的信息");
+                                    console.log(data);
+                                    $(goods).each(function (index, item) {
+                                        item = JSON.parse(item);
+                                        if (ids.length) {
+                                            if (-1 == ids.findIndex(function (ele) { return ele == item.id }))
+                                                imgStr = "<img class='collection' style='background-color:white' src='__STATIC__/index/index/pic/collection.png'/>";
+                                            else
+                                                imgStr = "<img class='collection' style='background-color:yellow' src='__STATIC__/index/index/pic/collection.png'/>";
+                                            strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p>" + imgStr;
+                                        }
+                                        else {
+                                            strall = "<span class='content-span' style='text-overflow:ellipsis'>详情:" + item.description + "</span><p class='price'>价格: ￥" + item.price + "</p><p>收藏量:  " + item.likes + "</p><img class='collection' src='__STATIC__/index/index/pic/collection.png'/>";
+                                        }
+                                        str = item.path.split(/\;|\；/);
+                                        div = document.createElement("div");
+                                        div.innerHTML = strall;
+                                        img = document.createElement("img");
+                                        img.setAttribute("src", str[1]);
+                                        img.setAttribute("id", item.id);
+                                        img.setAttribute("class", "content-img");
+                                        div.setAttribute("class", "content-div");
+                                        div.appendChild(img);
+                                        outer = document.getElementById("content");
+                                        outer.appendChild(div);
+                                    }
+                                    );
+                                    replaceFooter();
+                                    _isLoading = false;
+                                    $("div.foot").css("top", "0px");
+                                    $("#content img.loading").remove();
+                                    $(window).bind("scroll", loading);
+                                }
+                            }
+                                  ,
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status);
+                                alert(XMLHttpRequest.readyState);
+                                alert(textStatus);
+                            },
+                        }
+                        );
+                    }
+                }
+               
             }
-            
         }
-        $(window).scroll(loading);
     </script>
     {include file="common/foot" /}
 </body>

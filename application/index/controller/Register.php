@@ -153,6 +153,5 @@ class Register extends Controller
 			}
 		else
 			return $this->fetch('mail_fail');
-		
 	}
 }

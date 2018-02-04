@@ -16,7 +16,12 @@ class Login extends Controller
 		$time=date("Y-m-d H:i:s",$req->time());
 		$ip=$req->ip();
 		//位置之后需要改变
-		$wip=";".$ip."'".$time."'"."浙江杭州";
+		$taobaoIP = 'http://ip.taobao.com/service/getIpInfo.php?ip='.$ip;
+        $IPinfo = json_decode(file_get_contents($taobaoIP));
+		$province = $IPinfo->data->region;
+        $city = $IPinfo->data->city;
+        $data = $province.$city;
+		$wip=";".$ip."'".$time."'".$data;
 		
 		$data=$req->param();
 		$autolog_token=MD5(time());
@@ -56,7 +61,7 @@ class Login extends Controller
 						
 					}
 
-			return json(['status'=>'ok','username'=>$data["username"],'id'=>$id]);
+			return json(['status'=>'ok']);
 		}
 		else
 			return json(['status'=>'fail_pass','messege'=>"密码错误"]);

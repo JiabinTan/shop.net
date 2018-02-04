@@ -21,8 +21,17 @@ class Goods extends Controller
        {
        		$goods[$i]=$good[$i]->toJson();
        }
-       
-        return	json(['status'=>'ok','count'=>$count,'goods'=>$goods,'isAll'=>$count<50]);
+	   $user_model=new UserModel();
+	   $user_id=Session::get("id","personinfo");
+	   if($user_id){
+			$user=$user_model->get($user_id);
+			$likes=explode(";",$user->likes);
+	   }
+	   else
+	   {
+			$likes=Array();
+	   }
+        return	json(['status'=>'ok','count'=>$count,'goods'=>$goods,"likes"=>$likes,'isAll'=>$count<50]);
     }
     public function detail()
     {
@@ -49,45 +58,109 @@ class Goods extends Controller
 		}
         $model=new GoodsModel();
         $good=$model->whereOr(
-		['tag1'=>$tag,
-		'tag2'=>$tag,
-		'tag3'=>$tag,
-		])->where('expire','>=',date('Y-m-d h:i:s'))->limit($start,50)->order('id','asc')->field('id,name,path,price,description,likes')->select();
+		'tag1|tag2|tag3','like',$tag)->where('expire','>=',date('Y-m-d H:i:s'))->limit($start,50)->order('id','asc')->field('id,name,path,price,description,likes')->select();
         $count=count($good);
        for($i=0;$i < $count;$i++)
        {
        		$goods[$i]=$good[$i]->toJson();
        }
-       
-        return	json(['status'=>'ok','count'=>$count,'goods'=>$goods,'isAll'=>$count<50]);
+       $user_model=new UserModel();
+	   $user_id=Session::get("id","personinfo");
+	   if($user_id){
+			$user=$user_model->get($user_id);
+			$likes=explode(";",$user->likes);
+	   }
+	   else
+	   {
+			$likes=Array();
+	   }
+        return	json(['status'=>'ok','count'=>$count,'goods'=>$goods,"likes"=>$likes,'isAll'=>$count<50]);
+	}
+	public function range()
+    {
+
+		$para=Request::instance()->param();
+    	$start=$para['items'];
+		$min=$para['min'];
+		$max=$para['max'];
+    	if(!($min&&$max))
+		{
+			return json(["status"=>"fail"]);
+		}
+        $model=new GoodsModel();
+		if(!$model->where("price","BETWEEN","$min,$max")->select())
+			return json(['status'=>'ok','count'=>0,'goods'=>null,"likes"=>null,'isAll'=>true]);
+        $good=$model->where("price","BETWEEN","$min,$max")->where('expire','>=',date('Y-m-d H:i:s'))->limit($start,50)->order('id','asc')->field('id,name,path,price,description,likes')->select();
+        $count=count($good);
+       for($i=0;$i < $count;$i++)
+       {
+       		$goods[$i]=$good[$i]->toJson();
+       }
+       $user_model=new UserModel();
+	   $user_id=Session::get("id","personinfo");
+	   if($user_id){
+			$user=$user_model->get($user_id);
+			$likes=explode(";",$user->likes);
+	   }
+	   else
+	   {
+			$likes=Array();
+	   }
+        return	json(['status'=>'ok','count'=>$count,'goods'=>$goods,"likes"=>$likes,'isAll'=>$count<50]);
 	}
 	public function sort()
     {
-
+		$user_model=new UserModel();
+	   $user_id=Session::get("id","personinfo");
+	   if($user_id){
+			$user=$user_model->get($user_id);
+			$likes=explode(";",$user->likes);
+	   }
+	   else
+	   {
+			$likes=Array();
+	   }
 		$para=Request::instance()->param();
 		$start=$para['count'];
     	$state=$para['status'];//1降序，2升序
 		$tag=$para['tag'];//0代表热度，1代表价格
+		$search=$para["search_tag"];
     	if($tag!='1'&&$tag!='0')
 		{
 			return json(["status"=>"fail"]);
 		}
         $model=new GoodsModel();
-		if(0==$tag&&1==$state)
-			$good=$model->where('expire','>=',date('Y-m-d h:i:s'))->order('likes','asc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
-		else if('0'==$tag&&'2'==$state)
-			$good=$model->where('expire','>=',date('Y-m-d h:i:s'))->order('likes','desc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
-		else if(1==$tag&&1==$state)
-			$good=$model->where('expire','>=',date('Y-m-d h:i:s'))->order('price','asc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
-		else if(1==$tag&&2==$state)
-			$good=$model->where('expire','>=',date('Y-m-d h:i:s'))->order('price','desc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
+		if(!$search){
+			if(0==$tag&&1==$state)
+				$good=$model->where('expire','>=',date('Y-m-d H:i:s'))->order('likes','asc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
+			else if('0'==$tag&&'2'==$state)
+				$good=$model->where('expire','>=',date('Y-m-d H:i:s'))->order('likes','desc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
+			else if(1==$tag&&1==$state)
+				$good=$model->where('expire','>=',date('Y-m-d H:i:s'))->order('price','asc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
+			else if(1==$tag&&2==$state)
+				$good=$model->where('expire','>=',date('Y-m-d H:i:s'))->order('price','desc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
+		}
+		else{
+			if(0==$tag&&1==$state)
+				$good=$model->whereOr(
+		['tag1'=>$tag,
+		'tag2'=>$tag,
+		'tag3'=>$tag,
+		])->where('expire','>=',date('Y-m-d H:i:s'))->order('likes','asc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
+			else if('0'==$tag&&'2'==$state)
+				$good=$model->whereOr('tag1|tag2|tag3','like',$tag)->where('expire','>=',date('Y-m-d H:i:s'))->order('likes','desc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
+			else if(1==$tag&&1==$state)
+				$good=$model->whereOr('tag1|tag2|tag3','like',$tag)->where('expire','>=',date('Y-m-d H:i:s'))->order('price','asc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
+			else if(1==$tag&&2==$state)
+				$good=$model->whereOr('tag1|tag2|tag3','like',$tag)->where('expire','>=',date('Y-m-d H:i:s'))->order('price','desc')->limit($start,50)->field('id,name,path,price,description,likes')->select();
+		}
         $count=count($good);
        for($i=0;$i < $count;$i++)
        {
        		$goods[$i]=$good[$i]->toJson();
        }
        
-        return	json(['status'=>'ok','count'=>$count,'goods'=>$goods,'isAll'=>$count<50]);
+        return	json(['status'=>'ok','count'=>$count,'goods'=>$goods,"likes"=>$likes,'isAll'=>$count<50]);
 	}
 	public function buy()
 	{
@@ -256,5 +329,78 @@ class Goods extends Controller
 			//发送邮件卖家
 		
 
+	}
+	public function like()
+	{
+		$para=Request::instance()->param();
+		$good_id=$para["id"];
+		$select=$para["select"];
+		$user_id=Session::get("id","personinfo");
+		if(!$user_id)
+			return json(["status"=>"fail","messege"=>"请先登录后再继续操作！"]);
+		$user_model=new UserModel();
+		$good_model=new GoodsModel();
+		$user=$user_model->get($user_id);//买家
+		$good=$good_model->get($good_id);//物品
+
+		//买家与卖家邮箱验证
+		
+		if(!$user->email_state)
+			return json(["status"=>"fail","messege"=>"您的邮箱未激活，请激活后再操作"]);
+
+		//获取双方邮箱与用户名
+		$user_name=$user->username;
+		$user_email=$user->email;
+		
+
+
+
+		if(!$select)
+		{
+			$info="商品名：".$good->name . "<br/>标签：" . "{$good->tag1} {$good->tag2} {$good->tag3}" ;
+			//对买家进行操作
+		$tempStr=$user->likes;
+		$likes=explode(';',$tempStr);
+		if(in_array($good_id,$likes))
+			return json(["status"=>"fail","messege"=>"此商品已经在您的收藏清单中！"]);
+		$count=count($likes);
+		if($count>5)
+		{
+			for($i=1;$i<$count-4;$i++)
+			{
+				unset($likes[$i]);
+			}
+		}
+		$tempStr=implode(';',$likes);
+		$newlikes=$tempStr . ";" . $good_id;
+		$user->likes=$newlikes;
+		if(!$user->save()){
+			return json(["status"=>"fail","messege"=>"信息保存失败！"]);
+			}
+			else{ 
+			$good->setInc("likes");
+				return json(["status"=>"ok"]);
+			}
+		}
+		else{
+			
+		$info="商品名：".$good->name . "<br/>标签：" . "{$good->tag1} {$good->tag2} {$good->tag3}" ;
+			//对买家进行操作
+		$tempStr=$user->likes;
+		$likes=explode(';',$tempStr);
+		$key=array_search($good_id,$likes);
+		if(!$key)
+			return json(["status"=>"fail","messege"=>"此商品不在您的收藏清单中！"]);
+		unset($likes[$key]);
+		$tempStr=implode(';',$likes);
+		$user->likes=$tempStr;
+		if(!$user->save()){
+			return json(["status"=>"fail","messege"=>"信息保存失败！"]);
+			}
+		else{
+			$good->setDec("likes");
+			return json(["status"=>"ok"]);
+			}
+		}
 	}
 }

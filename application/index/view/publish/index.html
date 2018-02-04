@@ -231,6 +231,7 @@
                 
                 var formdata = new FormData();
                 $(files).each(function (k, file) {
+                    console.log("应该是index，文件的index，也可能是文件，忘记了");
                     console.log(k);
                     formdata.append("fileList[]", file);
                 });
@@ -266,6 +267,7 @@
                                 window.location.href = response.url;
                             }
                             else {
+                                console.log("返回信息");
                                 console.log(response);
 
                                 alert(response.messege);
@@ -659,8 +661,10 @@
                                         $("#preview").append(html);
                                         $("div.uploadImg img").load(function () {
                                             var preheight = $("#preview").height();
+                                            console.log("预览长度");
                                             console.log(preheight);
                                             $("div.outer").height(preheight + 559);
+                                            console.log("预览框长度，这边是为了优化界面，整个预览框可以不用管，我已经测试完成了");
                                             console.log($("div.outer").height());
                                         });
                                     } else {
@@ -710,8 +714,10 @@
                                 // 移除效果
                                 $("#uploadList_" + file.index).fadeOut(function () {
                                     var preheight = $("#preview").height();
+                                    console.log("预览长度");
                                     console.log(preheight);
                                     $("div.outer").height(preheight + 559);
+                                    console.log("预览框长度，这边是为了优化界面，整个预览框可以不用管，我已经测试完成了");
                                     console.log($("div.outer").height());
                                 });
                                 // 重新设置统计栏信息

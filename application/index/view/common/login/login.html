@@ -34,7 +34,7 @@
         <form>
             <!--action=“” 该处为发送表单至某处 method="post" -->
             <div id="usernamecontain">
-                <label class="log-user" for="username">输入用户名/邮箱/手机号</label>
+                <label class="log-user" for="username">输入用户名</label>
                 <input id="username" name="username" tabindex="1" placeholder="" class="user-name" type="text" value="">
             </div>
             <div id="passwordcontain">
@@ -87,13 +87,21 @@
                 else
                     return;
             });
+            $("#remLB").click(
+                function () {
+                    console.log($("#remmember").prop("checked"));
+                    if ($("#remmember").prop("checked"))
+                        $("#remmember").prop("checked", false);
+                    else
+                        $("#remmember").prop("checked", true);
+                });
             $('#submitcontain #close').click(
                 function(){
                         $("#iframe_log", parent.document).hide();
                 });
             $('#username').focus(function () {
                 
-                $('label.log-user').text('输入用户名/邮箱/手机号').css('color','black');
+                $('label.log-user').text('输入用户名').css('color','black');
                 $('#usernamecontain').css({
                     'border-bottom': '2px solid pink'
                 });
@@ -148,17 +156,7 @@
                            $('#password').val('');
                        }
                        else {
-                           var username = data.username;
-                           var id = data.id;
-                           $("div.top-bar input , div.top-bar a", parent.document).remove();
-                           //var src = "'" + data.src + "'";
-                           src = "__STATIC__/index/index/pic/1.jpg";
-                           var top_bar = $("div.top-bar", parent.document);
-                           $("<img class='headshot' src='" + src + "'/>").appendTo(top_bar);
-                           $("<div class='info-block'><p class='name'>" + username + "</p><p class='ID'>" + id + "</p>" + "<a href='javascript::void(0)' class='logout'>登出</a>" + "</div>").appendTo(top_bar);
-                           $(".nav-ul li a span.person-info", parent.document).text("个人主页");
-                           $(".nav-ul li a .headshot img", parent.document).attr("src", "__STATIC__/index/index/pic/1.jpg");
-                           $("#iframe_log", parent.document).hide();
+                           parent.window.location.reload();
                        }
                    }
                   ,

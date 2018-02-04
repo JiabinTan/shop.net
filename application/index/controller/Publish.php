@@ -42,7 +42,7 @@ class Publish extends Controller
 		for($i=0;$i<$count;$i++)
 		{
 			//部署时候需要改变位置
-			$imgInfo=$images[$i]->move("D:\dev\shop.net\public\uploads");
+			$imgInfo=$images[$i]->move(ROOT_PATH."public\uploads");
 			if(false==$imgInfo)
 				return json(['status'=>'fail','messege'=>"商品图片存储存在问题，请重试",'url'=>"\\"]);
 			$path=$path . ";" . "\\uploads\\" . $imgInfo->getSaveName();
