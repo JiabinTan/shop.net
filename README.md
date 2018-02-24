@@ -1,7 +1,7 @@
 
 ### 说明
 
-代码就此不再更新，网站地址www.funnywtx.xin
+代码就此不再更新，网站地址[This link](http://www.funnywtx.xin/) KOMO TOWN.
 
 
 ## 目录结构
